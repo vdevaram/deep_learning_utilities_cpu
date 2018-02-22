@@ -65,7 +65,7 @@ python tf_inference.py --image_dir $IMAGE_DIR --graph frozen/frozen_vgg_19.pb --
 
 python tf_inference.py --image_dir $IMAGE_DIR --graph frozen/frozen_resenet_v1_50.pb --labels imagenet_slim_labels.txt --input_height 224 --input_width 224 --input_mean 0 --input_std 255 --input_layer input --output_layer resnet_v1_50/predictions/Reshape_1 --batch_size 16 --top_accuracy 1
 
-python tf_inference.py --image_dir $IMAGE_DIR --graph frozen/frozen_resenet_v1_50.pb --labels imagenet_slim_labels.txt --input_height 224 --input_width 224 --input_mean 0 --input_std 255 --input_layer input --output_layer resnet_v1_50/predictions/Reshape_1 --batch_size 16 --top_accuracy 1
+python tf_inference.py --image_dir $IMAGE_DIR --graph frozen/frozen_resenet_v1_101.pb --labels imagenet_slim_labels.txt --input_height 224 --input_width 224 --input_mean 0 --input_std 255 --input_layer input --output_layer resnet_v1_101/predictions/Reshape_1 --batch_size 16 --top_accuracy 1
 
 python tf_inference.py --image_dir $IMAGE_DIR --graph frozen/frozen_resenet_v1_152.pb --labels imagenet_slim_labels.txt --input_height 224 --input_width 224 --input_mean 0 --input_std 255 --input_layer input --output_layer resnet_v1_152/predictions/Reshape_1 --batch_size 16 --top_accuracy 1
 
