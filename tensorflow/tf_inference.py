@@ -49,7 +49,6 @@ def read_tensor_from_image_file(file_list,
 
  
   im = []
-  print ("Batch start index :",index)
   for i in range(batch_size):
 
     file_name = file_list[i+index]
@@ -100,10 +99,13 @@ if __name__ == "__main__":
   input_layer = "input"  
   batch_size = 1
   top_accuracy = 1
+  data_type = "ImageNet"
+  benchmark = 1
 
 
   parser = argparse.ArgumentParser()
   parser.add_argument("--image_dir", help="image DIR to be processed")
+  parser.add_argument("--data_type", help="input data type to be processed 'synthetic or imagenet'")
   parser.add_argument("--graph", help="graph/model to be executed")
   parser.add_argument("--labels", help="name of file containing labels")
   parser.add_argument("--input_height", type=int, help="input height")
@@ -114,6 +116,7 @@ if __name__ == "__main__":
   parser.add_argument("--output_layer", help="name of output layer")
   parser.add_argument("--batch_size", type=int, help="batch_size")
   parser.add_argument("--top_accuracy", type=int, help="number of top accuracy")
+  parser.add_argument("--benchmark", type=int, help=" 0 if inference results to be printed")
   args = parser.parse_args()
 
   if args.graph:
@@ -139,6 +142,10 @@ if __name__ == "__main__":
     output_layer = args.output_layer
   if args.batch_size:
     batch_size = args.batch_size
+  if args.data_type:
+    data_type = args.data_type
+  if not args.benchmark:
+    benchmark = args.benchmark
   if args.top_accuracy:
     top_accuracy = args.top_accuracy
   top_accuracy = -1 * top_accuracy  
@@ -148,15 +155,24 @@ if __name__ == "__main__":
   file_list = os.listdir(image_dir)
   file_list = [ os.path.join(image_dir,i) for i in file_list ]
 
-  all_start = time.time()
+  start = time.time()
   
   length = len(file_list) // batch_size
-
   for i in range(length):
     
-    start = time.time()
+    print ("Batch :",i)
+    batch_start = time.time()
     i = i * batch_size
-    t = read_tensor_from_image_file(
+    if data_type == "synthetic":
+      data = tf.truncated_normal([batch_size, input_height, input_width, 3],
+                                 dtype = tf.float32,
+                                 mean = input_mean,
+                                 stddev = input_std)
+      with tf.Session() as sess:
+        t = sess.run (data)
+
+    else :
+      t = read_tensor_from_image_file(
       file_list,
       input_height=input_height,
       input_width=input_width,
@@ -164,7 +180,7 @@ if __name__ == "__main__":
       input_std=input_std,
       batch_size = batch_size,
       index = i)
-
+    pre_time = time.time()
     input_name = "import/" + input_layer
     output_name = "import/" + output_layer
     input_operation = graph.get_operation_by_name(input_name)
@@ -174,10 +190,14 @@ if __name__ == "__main__":
       results = sess.run(output_operation.outputs[0], {
         input_operation.outputs[0]: t
       })
-    labels = load_labels(label_file)
-    for j in range(batch_size):
-      top_k = results[j].argsort()[top_accuracy:][::-1]
-      for k in top_k:
-        print(labels[k], results[j][k])
-    print("time for batch is ",time.time() - start,"ms\n\n")
-  print("time for all images is ",time.time() - all_start,"ms\n\n")
+    inf_time = time.time()
+    if benchmark == 0:
+      labels = load_labels(label_file)
+      for j in range(batch_size):
+        top_k = results[j].argsort()[top_accuracy:][::-1]
+        for k in top_k:
+          print(labels[k], results[j][k])
+    batch_time = time.time()
+    print("Data TP\t\t","Inference TP\t\t","Batch TP\t")
+    print(batch_size//(pre_time-batch_start),"\t\t",batch_size//(inf_time-pre_time),"\t\t\t",batch_size//(batch_time-batch_start),"\t\n\n")
+  print("Total Throughput of ",length*batch_size," "+ data_type + " data: ", length*batch_size/(time.time()-start)," Images/sec")  
