@@ -59,16 +59,36 @@ bazel-bin/tensorflow/python/tools/freeze_graph   --input_graph=$WKDIR/pb/incepti
 bazel-bin/tensorflow/python/tools/freeze_graph   --input_graph=$WKDIR/pb/inception_v4.pb   --input_checkpoint=$WKDIR/ckpt/inception_v4.ckpt   --input_binary=true --output_graph=$WKDIR/frozen/frozen_inception_v4.pb   --output_node_names=InceptionV4/Logits/Predictions
 cd $WKDIR
 #run the inference benchmarking with desired params
-python tf_inference.py --image_dir $IMAGE_DIR --graph frozen/frozen_vgg_16.pb --labels imagenet_slim_labels.txt --input_height 224 --input_width 224 --input_mean 0 --input_std 255 --input_layer input --output_layer vgg_16/fc8/squeezed --batch_size 16 --top_accuracy 1
+#export OMP_NUM_THREADS=4
+#export KMP_AFFINITY="granularity=thread,proclist=[0-3,56-59],explicit,verbose"
+echo "Synthetic data Benchmarking"
+numactl -l python tf_inference.py --image_dir $IMAGE_DIR --graph $WKDIR/frozen/frozen_vgg_16.pb --labels imagenet_slim_labels.txt --input_height 224 --input_width 224 --input_mean 0 --input_std 255 --input_layer input --output_layer vgg_16/fc8/squeezed --batch_size 16 --top_accuracy 1  --benchmark 1 --image_type jpeg --data_type synthetic
 
-python tf_inference.py --image_dir $IMAGE_DIR --graph frozen/frozen_vgg_19.pb --labels imagenet_slim_labels.txt --input_height 224 --input_width 224 --input_mean 0 --input_std 255 --input_layer input --output_layer vgg_19/fc8/squeezed --batch_size 16 --top_accuracy 1
+numactl -l python tf_inference.py --image_dir $IMAGE_DIR --graph $WKDIR/frozen/frozen_vgg_19.pb --labels imagenet_slim_labels.txt --input_height 224 --input_width 224 --input_mean 0 --input_std 255 --input_layer input --output_layer vgg_19/fc8/squeezed --batch_size 16 --top_accuracy 1  --benchmark 1 --image_type jpeg --data_type synthetic
 
-python tf_inference.py --image_dir $IMAGE_DIR --graph frozen/frozen_resenet_v1_50.pb --labels imagenet_slim_labels.txt --input_height 224 --input_width 224 --input_mean 0 --input_std 255 --input_layer input --output_layer resnet_v1_50/predictions/Reshape_1 --batch_size 16 --top_accuracy 1
+numactl -l python tf_inference.py --image_dir $IMAGE_DIR --graph $WKDIR/frozen/frozen_resenet_v1_50.pb --labels imagenet_slim_labels.txt --input_height 224 --input_width 224 --input_mean 0 --input_std 255 --input_layer input --output_layer resnet_v1_50/predictions/Reshape_1 --batch_size 16 --top_accuracy 1  --benchmark 1 --image_type jpeg --data_type synthetic
 
-python tf_inference.py --image_dir $IMAGE_DIR --graph frozen/frozen_resenet_v1_101.pb --labels imagenet_slim_labels.txt --input_height 224 --input_width 224 --input_mean 0 --input_std 255 --input_layer input --output_layer resnet_v1_101/predictions/Reshape_1 --batch_size 16 --top_accuracy 1
+numactl -l python tf_inference.py --image_dir $IMAGE_DIR --graph $WKDIR/frozen/frozen_resenet_v1_101.pb --labels imagenet_slim_labels.txt --input_height 224 --input_width 224 --input_mean 0 --input_std 255 --input_layer input --output_layer resnet_v1_101/predictions/Reshape_1 --batch_size 16 --top_accuracy 1  --benchmark 1 --image_type jpeg --data_type synthetic
 
-python tf_inference.py --image_dir $IMAGE_DIR --graph frozen/frozen_resenet_v1_152.pb --labels imagenet_slim_labels.txt --input_height 224 --input_width 224 --input_mean 0 --input_std 255 --input_layer input --output_layer resnet_v1_152/predictions/Reshape_1 --batch_size 16 --top_accuracy 1
+numactl -l python tf_inference.py --image_dir $IMAGE_DIR --graph $WKDIR/frozen/frozen_resenet_v1_152.pb --labels imagenet_slim_labels.txt --input_height 224 --input_width 224 --input_mean 0 --input_std 255 --input_layer input --output_layer resnet_v1_152/predictions/Reshape_1 --batch_size 16 --top_accuracy 1  --benchmark 1 --image_type jpeg --data_type synthetic
 
-python tf_inference.py --image_dir $IMAGE_DIR --graph frozen/frozen_inception_v3.pb --labels imagenet_slim_labels.txt --input_height 299 --input_width 299 --input_mean 0 --input_std 255 --input_layer input --output_layer InceptionV3/Predictions/Reshape_1 --batch_size 16 --top_accuracy 1
+numactl -l python tf_inference.py --image_dir $IMAGE_DIR --graph $WKDIR/frozen/frozen_inception_v3.pb --labels imagenet_slim_labels.txt --input_height 299 --input_width 299 --input_mean 0 --input_std 255 --input_layer input --output_layer InceptionV3/Predictions/Reshape_1 --batch_size 16 --top_accuracy 1  --benchmark 1 --image_type jpeg --data_type synthetic
 
-python tf_inference.py --image_dir $IMAGE_DIR --graph frozen/frozen_inception_v4.pb --labels imagenet_slim_labels.txt --input_height 299 --input_width 299 --input_mean 0 --input_std 255 --input_layer input --output_layer InceptionV4/Logits/Predictions --batch_size 16 --top_accuracy 1
+numactl -l python tf_inference.py --image_dir $IMAGE_DIR --graph $WKDIR/frozen/frozen_inception_v4.pb --labels imagenet_slim_labels.txt --input_height 299 --input_width 299 --input_mean 0 --input_std 255 --input_layer input --output_layer InceptionV4/Logits/Predictions --batch_size 16 --top_accuracy 1  --benchmark 1 --image_type jpeg --data_type synthetic
+
+
+echo "ImageNet data Benchmarking"
+
+numactl -l python tf_inference.py --image_dir $IMAGE_DIR --graph $WKDIR/frozen/frozen_vgg_16.pb --labels imagenet_slim_labels.txt --input_height 224 --input_width 224 --input_mean 0 --input_std 255 --input_layer input --output_layer vgg_16/fc8/squeezed --batch_size 16 --top_accuracy 1  --benchmark 1 --image_type jpeg 
+
+numactl -l python tf_inference.py --image_dir $IMAGE_DIR --graph $WKDIR/frozen/frozen_vgg_19.pb --labels imagenet_slim_labels.txt --input_height 224 --input_width 224 --input_mean 0 --input_std 255 --input_layer input --output_layer vgg_19/fc8/squeezed --batch_size 16 --top_accuracy 1  --benchmark 1 --image_type jpeg 
+
+numactl -l python tf_inference.py --image_dir $IMAGE_DIR --graph $WKDIR/frozen/frozen_resenet_v1_50.pb --labels imagenet_slim_labels.txt --input_height 224 --input_width 224 --input_mean 0 --input_std 255 --input_layer input --output_layer resnet_v1_50/predictions/Reshape_1 --batch_size 16 --top_accuracy 1  --benchmark 1 --image_type jpeg 
+
+numactl -l python tf_inference.py --image_dir $IMAGE_DIR --graph $WKDIR/frozen/frozen_resenet_v1_101.pb --labels imagenet_slim_labels.txt --input_height 224 --input_width 224 --input_mean 0 --input_std 255 --input_layer input --output_layer resnet_v1_101/predictions/Reshape_1 --batch_size 16 --top_accuracy 1  --benchmark 1 --image_type jpeg 
+
+numactl -l python tf_inference.py --image_dir $IMAGE_DIR --graph $WKDIR/frozen/frozen_resenet_v1_152.pb --labels imagenet_slim_labels.txt --input_height 224 --input_width 224 --input_mean 0 --input_std 255 --input_layer input --output_layer resnet_v1_152/predictions/Reshape_1 --batch_size 16 --top_accuracy 1  --benchmark 1 --image_type jpeg 
+
+numactl -l python tf_inference.py --image_dir $IMAGE_DIR --graph $WKDIR/frozen/frozen_inception_v3.pb --labels imagenet_slim_labels.txt --input_height 299 --input_width 299 --input_mean 0 --input_std 255 --input_layer input --output_layer InceptionV3/Predictions/Reshape_1 --batch_size 16 --top_accuracy 1  --benchmark 1 --image_type jpeg 
+
+numactl -l python tf_inference.py --image_dir $IMAGE_DIR --graph $WKDIR/frozen/frozen_inception_v4.pb --labels imagenet_slim_labels.txt --input_height 299 --input_width 299 --input_mean 0 --input_std 255 --input_layer input --output_layer InceptionV4/Logits/Predictions --batch_size 16 --top_accuracy 1  --benchmark 1 --image_type jpeg 

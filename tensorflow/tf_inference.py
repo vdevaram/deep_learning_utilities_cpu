@@ -45,32 +45,28 @@ def read_tensor_from_image_file(file_list,
                                 input_mean=0,
                                 input_std=255,
                                 batch_size=1,
-                                index=0):
+                                index=0,
+                                image_type="jpeg"):
 
  
-  im = []
-  for i in range(batch_size):
-
-    file_name = file_list[i+index]
-    
-    file_reader = tf.read_file(file_name)
-    if file_name.endswith(".png"):
-      image_reader = tf.image.decode_png(
-          file_reader, channels=3, name="png_reader")
-    elif file_name.endswith(".gif"):
-      image_reader = tf.squeeze(
-          tf.image.decode_gif(file_reader, name="gif_reader"))
-    elif file_name.endswith(".bmp"):
-      image_reader = tf.image.decode_bmp(file_reader, name="bmp_reader")
-    else:
-      image_reader = tf.image.decode_jpeg(
-          file_reader, channels=3, name="jpeg_reader")
-    float_caster = tf.cast(image_reader, tf.float32)
-    resized = tf.image.resize_images(float_caster, [input_height, input_width])
-    normalized = tf.divide(tf.subtract(resized, [input_mean]), [input_std])
-    im.append(normalized)
-  sess = tf.Session()
-  result = sess.run(im)
+  image = tf.placeholder(tf.string)
+  if image_type == "jpeg":
+    decode = tf.image.decode_jpeg(image,channels=3)
+  elif image_type == "png":
+    decode = tf.image.decode_png(image,channels=3)
+  elif image_type == "bmp":
+    decode = tf.image.decode_bmp(image,channels=3)
+  else :
+    print (image_type, " is not handled")
+    exit()
+  resize = tf.image.resize_images(decode, [input_height, input_width])
+  normalized = tf.divide(tf.subtract(resize, [input_mean]), [input_std])
+  with tf.Session() as sess:
+    result =[]
+    for num in range(batch_size):
+      img_data = tf.gfile.FastGFile(file_list[num+index],"rb").read()
+      out = sess.run(normalized,feed_dict = {image:img_data})
+      result.append(out)
 
   return result
 
@@ -92,6 +88,7 @@ if __name__ == "__main__":
   output_layer = "resnet_v1_101/predictions/Reshape_1"
   # assuming all images are stored in images folder
   image_dir = "images"
+  image_type = "jpeg"
   input_height = 224
   input_width = 224
   input_mean = 0
@@ -105,6 +102,7 @@ if __name__ == "__main__":
 
   parser = argparse.ArgumentParser()
   parser.add_argument("--image_dir", help="image DIR to be processed")
+  parser.add_argument("--image_type", help="images type to be processed. Supported are jpeg/png/bmp")
   parser.add_argument("--data_type", help="input data type to be processed 'synthetic or imagenet'")
   parser.add_argument("--graph", help="graph/model to be executed")
   parser.add_argument("--labels", help="name of file containing labels")
@@ -126,6 +124,8 @@ if __name__ == "__main__":
       print (args.image_dir, " is not a directory for getting images list\n")
       exit()
     image_dir = args.image_dir
+  if args.image_type:
+    image_type = args.image_type
   if args.labels:
     label_file = args.labels
   if args.input_height:
@@ -179,7 +179,8 @@ if __name__ == "__main__":
       input_mean=input_mean,
       input_std=input_std,
       batch_size = batch_size,
-      index = i)
+      index = i,
+      image_type=image_type)
     pre_time = time.time()
     input_name = "import/" + input_layer
     output_name = "import/" + output_layer
