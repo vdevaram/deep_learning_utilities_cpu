@@ -32,6 +32,8 @@ tar -xvf resnet_v1_152_2016_08_28.tar.gz
 mkdir -p $WKDIR/ckpt
 mv *.ckpt ckpt
 rm -rf *.gz
+#install TF
+pip install --user --upgrade tensorflow
 #download the code
 git clone https://github.com/tensorflow/models.git
 git clone https://github.com/tensorflow/tensorflow.git
