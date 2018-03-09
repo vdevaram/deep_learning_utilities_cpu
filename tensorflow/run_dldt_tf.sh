@@ -6,6 +6,7 @@
 ############################################################################
 # Mandatory : Install latest DLDT and intel python 3.5 or later
 ############################################################################
+if [ $? -eq 0 ]; then export LINUX="UBUNTU"; else export LINUX="CENTOS"; fi
 #Point to the path where you want to load all files
 export WKDIR=~/tf_inference_demo
 #Point to the path where you want to load all images 
@@ -13,47 +14,79 @@ export DATA_PATH=~/imageNet
 export SAMPLES_PATH=$WKDIR/samples
 export LOGS_PATH=$WKDIR/logs
 export DLDT_PATH=~/intel/deeplearning_deploymenttoolkit_2018.0.8585.0/deployment_tools
-export PY3_PATH=/opt/intel/intelpython3
 export InferenceEngine_DIR=$DLDT_PATH/inference_engine/share
-export LD_LIBRARY_PATH=$PY3_PATH/lib:$DLDT_PATH/inference_engine/external/mklml_lnx/lib:$DLDT_PATH/inference_engine/external/cldnn/lib/:$DLDT_PATH/inference_engine/lib/centos_7.3/intel64/:$LD_LIBRARY_PATH
-export PATH=$PY3_PATH/bin:$PATH
 export MO_MODELS_PATH=$WKDIR/mo_models
 export FROZEN_MODELS=$WKDIR/frozen
+if [ $LINUX == "UBUNTU" ]
+then 
+    export PY3_PATH=/usr/local 
+else
+    export PY3_PATH=/opt/intel/intelpython3
+fi
+export LD_LIBRARY_PATH=$PY3_PATH/lib:$DLDT_PATH/inference_engine/external/mklml_lnx/lib:$DLDT_PATH/inference_engine/external/cldnn/lib/:$DLDT_PATH/inference_engine/lib/centos_7.3/intel64/:$DLDT_PATH/inference_engine/lib/ubuntu_16.04/intel64/:$LD_LIBRARY_PATH
+export PATH=$PY3_PATH/bin:$PATH
 mkdir -p $WKDIR
 mkdir -p $MO_MODELS_PATH
 mkdir -p $SAMPLES_PATH
 mkdir -p $LOGS_PATH
 cd $WKDIR
-echo "This script assumes that latest DLDT is installed. For Centos Intel python 3.5 or later is also installed"
+echo "This script assumes that latest DLDT and OPENCV are installed. For Centos Intel python 3.5 or later is required installed"
 #setup python environment
-# For Ubuntu
-# sudo apt install virtualenv
-# virtualenv -p /usr/bin/python3 .dldt --system-site-packages 
-sudo yum install python-virtualenv cmake
-virtualenv -p /opt/intel/intelpython3/bin/python .dldt --system-site-packages
+uname -a | grep -i 'Ubuntu' &>/dev/null
+if [ $LINUX == "UBUNTU" ]
+then
+    # For Ubuntu
+    sudo apt update
+    sudo apt install -y virtualenv cmake pkg-config zip g++ zlib1g-dev unzip  python3-numpy python3-dev python3-pip python3-wheel
+    pip3 install setuptools numpy --upgrade 
+    rm -rf .dldt
+    virtualenv -p /usr/bin/python3 .dldt --system-site-packages 
+    # Bazel for ubuntu
+    bazel version &>/dev/null
+    if ! [ $? -eq 0 ]
+    then
+        wget https://github.com/bazelbuild/bazel/releases/download/0.11.1/bazel-0.11.1-installer-linux-x86_64.sh
+        chmod 777 bazel-0.11.1-installer-linux-x86_64.sh
+        sudo ./bazel-0.11.1-installer-linux-x86_64.sh
+    fi
+else
+    # For CentOS 
+    sudo yum install -y python-virtualenv cmake numpy python3-devel python3-pip python3-wheel
+    virtualenv -p /opt/intel/intelpython3/bin/python .dldt --system-site-packages
+fi
 . .dldt/bin/activate
-# download all trained .pb files
-wget http://download.tensorflow.org/models/vgg_16_2016_08_28.tar.gz
-tar -xvf vgg_16_2016_08_28.tar.gz
-wget http://download.tensorflow.org/models/vgg_19_2016_08_28.tar.gz
-tar -xvf vgg_19_2016_08_28.tar.gz
-wget http://download.tensorflow.org/models/inception_v3_2016_08_28.tar.gz
-tar -xvf inception_v3_2016_08_28.tar.gz
-wget http://download.tensorflow.org/models/inception_v4_2016_09_09.tar.gz
-tar -xvf inception_v4_2016_09_09.tar.gz
-wget http://download.tensorflow.org/models/resnet_v1_50_2016_08_28.tar.gz
-tar -xvf resnet_v1_50_2016_08_28.tar.gz
-wget http://download.tensorflow.org/models/resnet_v1_101_2016_08_28.tar.gz
-tar -xvf resnet_v1_101_2016_08_28.tar.gz
-wget http://download.tensorflow.org/models/resnet_v1_152_2016_08_28.tar.gz
-tar -xvf resnet_v1_152_2016_08_28.tar.gz
-mkdir -p $WKDIR/ckpt
-mv *.ckpt ckpt
-rm -rf *.gz
+if ! [ -d "ckpt" ]
+then
+    # download all trained .pb files
+    wget http://download.tensorflow.org/models/vgg_16_2016_08_28.tar.gz
+    tar -xvf vgg_16_2016_08_28.tar.gz
+    wget http://download.tensorflow.org/models/vgg_19_2016_08_28.tar.gz
+    tar -xvf vgg_19_2016_08_28.tar.gz
+    wget http://download.tensorflow.org/models/inception_v3_2016_08_28.tar.gz
+    tar -xvf inception_v3_2016_08_28.tar.gz
+    wget http://download.tensorflow.org/models/inception_v4_2016_09_09.tar.gz
+    tar -xvf inception_v4_2016_09_09.tar.gz
+    wget http://download.tensorflow.org/models/resnet_v1_50_2016_08_28.tar.gz
+    tar -xvf resnet_v1_50_2016_08_28.tar.gz
+    wget http://download.tensorflow.org/models/resnet_v1_101_2016_08_28.tar.gz
+    tar -xvf resnet_v1_101_2016_08_28.tar.gz
+   wget http://download.tensorflow.org/models/resnet_v1_152_2016_08_28.tar.gz
+   tar -xvf resnet_v1_152_2016_08_28.tar.gz
+   mkdir -p $WKDIR/ckpt
+   mv *.ckpt ckpt
+   rm -rf *.gz
+fi
 #download the code
-git clone https://github.com/tensorflow/models.git
+if ! [ -d "models" ]
+then 
+    git clone https://github.com/tensorflow/models.git
+fi
+if ! [ -d "tensorflow" ]
+then 
+    git clone https://github.com/tensorflow/tensorflow
+fi
 #install tensorflow
-pip3 install -r $DLDT_PATH/model_optimizer/requirements_tf.txt
+pip install -r $DLDT_PATH/model_optimizer/requirements.txt
 mkdir -p $WKDIR/pb
 mkdir -p $WKDIR/frozen
 python $WKDIR/models/research/slim/export_inference_graph.py  --alsologtostderr --model_name=vgg_16 --output_file=$WKDIR/pb/vgg_16.pb  --labels_offset=1
@@ -86,7 +119,7 @@ python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MO
 python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_resenet_v1_152.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH
 cd $SAMPLES_PATH
 cmake -DCMAKE_BUILD_TYPE=Release $DLDT_PATH/inference_engine/samples
-make -j(nproc)
+make 
 $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH -m $MO_MODELS_PATH/frozen_vgg_16.xml -d CPU -nt 2  &>$LOGS_PATH/vgg_16.log
 $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH -m $MO_MODELS_PATH/frozen_vgg_19.xml -d CPU -nt 2  &>$LOGS_PATH/vgg_19.log
 $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH -m $MO_MODELS_PATH/frozen_inception_v3.xml -d CPU -nt 2  &>$LOGS_PATH/inception_v3.log
