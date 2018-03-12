@@ -6,6 +6,7 @@
 ############################################################################
 # Mandatory : Install latest DLDT and intel python 3.5 or later
 ############################################################################
+uname -a | grep -i 'Ubuntu' &>/dev/null
 if [ $? -eq 0 ]; then export LINUX="UBUNTU"; else export LINUX="CENTOS"; fi
 #Point to the path where you want to load all files
 export WKDIR=~/tf_inference_demo
@@ -17,6 +18,7 @@ export DLDT_PATH=~/intel/deeplearning_deploymenttoolkit_2018.0.8585.0/deployment
 export InferenceEngine_DIR=$DLDT_PATH/inference_engine/share
 export MO_MODELS_PATH=$WKDIR/mo_models
 export FROZEN_MODELS=$WKDIR/frozen
+#setup python environment
 if [ $LINUX == "UBUNTU" ]
 then 
     export PY3_PATH=/usr/local 
@@ -27,12 +29,10 @@ export LD_LIBRARY_PATH=$PY3_PATH/lib:$DLDT_PATH/inference_engine/external/mklml_
 export PATH=$PY3_PATH/bin:$PATH
 mkdir -p $WKDIR
 mkdir -p $MO_MODELS_PATH
-mkdir -p $SAMPLES_PATH
 mkdir -p $LOGS_PATH
+mkdir -p $SAMPLES_PATH
 cd $WKDIR
 echo "This script assumes that latest DLDT and OPENCV are installed. For Centos Intel python 3.5 or later is required installed"
-#setup python environment
-uname -a | grep -i 'Ubuntu' &>/dev/null
 if [ $LINUX == "UBUNTU" ]
 then
     # For Ubuntu
@@ -51,7 +51,14 @@ then
     fi
 else
     # For CentOS 
-    sudo yum install -y python-virtualenv cmake numpy python3-devel python3-pip python3-wheel
+    bazel version &>/dev/null
+    if ! [ $? -eq 0 ]
+    then 
+        wget https://copr.fedorainfracloud.org/coprs/vbatts/bazel/repo/epel-7/vbatts-bazel-epel-7.repo
+	sudo mv vbatts-bazel-epel-7.repo /etc/yum.repos.d/
+    fi
+    sudo yum install -y python-virtualenv cmake numpy python3-devel python3-pip python3-wheel bazel
+    sudo yum clean all
     virtualenv -p /opt/intel/intelpython3/bin/python .dldt --system-site-packages
 fi
 . .dldt/bin/activate
