@@ -117,8 +117,8 @@ bazel-bin/tensorflow/python/tools/freeze_graph   --input_graph=$WKDIR/pb/resnet_
 bazel-bin/tensorflow/python/tools/freeze_graph   --input_graph=$WKDIR/pb/inception_v3.pb   --input_checkpoint=$WKDIR/ckpt/inception_v3.ckpt   --input_binary=true --output_graph=$WKDIR/frozen/frozen_inception_v3.pb   --output_node_names=InceptionV3/Predictions/Reshape_1
 bazel-bin/tensorflow/python/tools/freeze_graph   --input_graph=$WKDIR/pb/inception_v4.pb   --input_checkpoint=$WKDIR/ckpt/inception_v4.ckpt   --input_binary=true --output_graph=$WKDIR/frozen/frozen_inception_v4.pb   --output_node_names=InceptionV4/Logits/Predictions
 cd $WKDIR
-python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_inception_v3.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH
-python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_inception_v4.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH
+python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_inception_v3.pb --batch 16 --data_type FP32 --scale 255    --reverse_input_channels --output_dir  $MO_MODELS_PATH
+python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_inception_v4.pb --batch 16 --data_type FP32 --scale 255    --reverse_input_channels --output_dir  $MO_MODELS_PATH
 python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_vgg_19.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH
 python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_vgg_16.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH
 python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_resenet_v1_50.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH
