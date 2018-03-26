@@ -29,7 +29,11 @@ export LD_LIBRARY_PATH=$PY3_PATH/lib:$DLDT_PATH/inference_engine/external/mklml_
 export PATH=$PY3_PATH/bin:$PATH
 mkdir -p $WKDIR
 mkdir -p $MO_MODELS_PATH
-mkdir -p $LOGS_PATH
+mkdir -p $MO_MODELS_PATH
+mkdir -p $MO_MODELS_PATH
+mkdir -p $LOGS_PATH/BS1
+mkdir -p $LOGS_PATH/BS16
+mkdir -p $LOGS_PATH/BS32
 mkdir -p $SAMPLES_PATH
 cd $WKDIR
 echo "This script assumes that latest DLDT and OPENCV are installed. For Centos Intel python 3.5 or later is required installed"
@@ -79,21 +83,41 @@ then
 fi
 pip install -r $DLDT_PATH/model_optimizer/requirements_caffe.txt
 cd $WKDIR
-python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/bvlc_alexnet.caffemodel --batch 16 --data_type FP32  --input_proto $CAFFE_MODELS/alexnet_deploy.prototxt --output_dir  $MO_MODELS_PATH
-python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/bvlc_googlenet.caffemodel --batch 16 --data_type FP32  --input_proto $CAFFE_MODELS/googlenet_deploy.prototxt --output_dir  $MO_MODELS_PATH
-python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/VGG_ILSVRC_16_layers.caffemodel --batch 16 --data_type FP32  --input_proto $CAFFE_MODELS/VGG_ILSVRC_16_layers_deploy.prototxt --output_dir  $MO_MODELS_PATH
-python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/VGG_ILSVRC_19_layers.caffemodel --batch 16 --data_type FP32  --input_proto $CAFFE_MODELS/VGG_ILSVRC_19_layers_deploy.prototxt --output_dir  $MO_MODELS_PATH
-python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/ResNet-50-model.caffemodel --batch 16 --data_type FP32  --input_proto $CAFFE_MODELS/ResNet-50-deploy.prototxt  --output_dir  $MO_MODELS_PATH
-python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/ResNet-101-model.caffemodel --batch 16 --data_type FP32  --input_proto $CAFFE_MODELS/ResNet-101-deploy.prototxt  --output_dir  $MO_MODELS_PATH
-python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/ResNet-152-model.caffemodel --batch 16 --data_type FP32  --input_proto $CAFFE_MODELS/ResNet-152-deploy.prototxt  --output_dir  $MO_MODELS_PATH
+python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/bvlc_alexnet.caffemodel --batch 1 --data_type FP32  --input_proto $CAFFE_MODELS/alexnet_deploy.prototxt --output_dir  $MO_MODELS_PATH
+python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/bvlc_googlenet.caffemodel --batch 1 --data_type FP32  --input_proto $CAFFE_MODELS/googlenet_deploy.prototxt --output_dir  $MO_MODELS_PATH
+python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/VGG_ILSVRC_16_layers.caffemodel --batch 1 --data_type FP32  --input_proto $CAFFE_MODELS/VGG_ILSVRC_16_layers_deploy.prototxt --output_dir  $MO_MODELS_PATH
+python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/VGG_ILSVRC_19_layers.caffemodel --batch 1 --data_type FP32  --input_proto $CAFFE_MODELS/VGG_ILSVRC_19_layers_deploy.prototxt --output_dir  $MO_MODELS_PATH
+python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/ResNet-50-model.caffemodel --batch 1 --data_type FP32  --input_proto $CAFFE_MODELS/ResNet-50-deploy.prototxt  --output_dir  $MO_MODELS_PATH
+python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/ResNet-101-model.caffemodel --batch 1 --data_type FP32  --input_proto $CAFFE_MODELS/ResNet-101-deploy.prototxt  --output_dir  $MO_MODELS_PATH
+python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/ResNet-152-model.caffemodel --batch 1 --data_type FP32  --input_proto $CAFFE_MODELS/ResNet-152-deploy.prototxt  --output_dir  $MO_MODELS_PATH
+python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/inception-v3.caffemodel  --batch 1 --data_type FP32  --input_proto $CAFFE_MODELS/deploy_inception-v3.prototxt  --output_dir  $MO_MODELS_PATH --scale 255
 
 cd $SAMPLES_PATH
 cmake -DCMAKE_BUILD_TYPE=Release $DLDT_PATH/inference_engine/samples
 make 
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH -m $MO_MODELS_PATH/VGG_ILSVRC_16_layers.xml -d CPU -nt 2  &>$LOGS_PATH/vgg_16.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH -m $MO_MODELS_PATH/VGG_ILSVRC_16_layers.xml -d CPU -nt 2  &>$LOGS_PATH/vgg_19.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH -m $MO_MODELS_PATH/bvlc_alexnet.xml -d CPU -nt 2  &>$LOGS_PATH/alexnet.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH -m $MO_MODELS_PATH/bvlc_googlenet.xml -d CPU -nt 2  &>$LOGS_PATH/googlenet.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH -m $MO_MODELS_PATH/ResNet-50-model.xml -d CPU -nt 2  &>$LOGS_PATH/resenet_v1_50.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH -m $MO_MODELS_PATH/ResNet-101-model.xml -d CPU -nt 2  &>$LOGS_PATH/resenet_v1_101.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH -m $MO_MODELS_PATH/ResNet-152-model.xml -d CPU -nt 2  &>$LOGS_PATH/resenet_v1_152.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/VGG_ILSVRC_16_layers.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/vgg_16.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/VGG_ILSVRC_19_layers.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/vgg_19.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/bvlc_alexnet.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/alexnet.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/bvlc_googlenet.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/googlenet.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/ResNet-50-model.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/resenet_v1_50.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/ResNet-101-model.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/resenet_v1_101.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/ResNet-152-model.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/resenet_v1_152.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/inception-v3.xml -d CPU -nt 2 -ni 1000 &>$LOGS_PATH/BS1/inception_v3.log
+
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/VGG_ILSVRC_16_layers.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/vgg_16.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/VGG_ILSVRC_19_layers.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/vgg_19.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/bvlc_alexnet.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/alexnet.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/bvlc_googlenet.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/googlenet.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/ResNet-50-model.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/resenet_v1_50.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/ResNet-101-model.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/resenet_v1_101.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/ResNet-152-model.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/resenet_v1_152.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/inception-v3.xml -d CPU -nt 2 -ni 100 &>$LOGS_PATH/BS16/inception_v3.log
+
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/VGG_ILSVRC_16_layers.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/vgg_16.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/VGG_ILSVRC_19_layers.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/vgg_19.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/bvlc_alexnet.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/alexnet.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/bvlc_googlenet.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/googlenet.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/ResNet-50-model.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/resenet_v1_50.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/ResNet-101-model.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/resenet_v1_101.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/ResNet-152-model.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/resenet_v1_152.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/inception-v3.xml -d CPU -nt 2 -ni 100 &>$LOGS_PATH/BS32/inception_v3.log
