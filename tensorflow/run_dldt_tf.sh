@@ -29,7 +29,9 @@ export LD_LIBRARY_PATH=$PY3_PATH/lib:$DLDT_PATH/inference_engine/external/mklml_
 export PATH=$PY3_PATH/bin:$PATH
 mkdir -p $WKDIR
 mkdir -p $MO_MODELS_PATH
-mkdir -p $LOGS_PATH
+mkdir -p $LOGS_PATH/BS1
+mkdir -p $LOGS_PATH/BS16
+mkdir -p $LOGS_PATH/BS32
 mkdir -p $SAMPLES_PATH
 cd $WKDIR
 echo "This script assumes that latest DLDT and OPENCV are installed. For Centos Intel python 3.5 or later is required installed"
@@ -127,10 +129,26 @@ python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MO
 cd $SAMPLES_PATH
 cmake -DCMAKE_BUILD_TYPE=Release $DLDT_PATH/inference_engine/samples
 make 
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH -m $MO_MODELS_PATH/frozen_vgg_16.xml -d CPU -nt 2  &>$LOGS_PATH/vgg_16.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH -m $MO_MODELS_PATH/frozen_vgg_19.xml -d CPU -nt 2  &>$LOGS_PATH/vgg_19.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH -m $MO_MODELS_PATH/frozen_inception_v3.xml -d CPU -nt 2  &>$LOGS_PATH/inception_v3.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH -m $MO_MODELS_PATH/frozen_inception_v4.xml -d CPU -nt 2  &>$LOGS_PATH/inception_v4.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH -m $MO_MODELS_PATH/frozen_resenet_v1_50.xml -d CPU -nt 2  &>$LOGS_PATH/resenet_v1_50.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH -m $MO_MODELS_PATH/frozen_resenet_v1_101.xml -d CPU -nt 2  &>$LOGS_PATH/resenet_v1_101.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH -m $MO_MODELS_PATH/frozen_resenet_v1_152.xml -d CPU -nt 2  &>$LOGS_PATH/resenet_v1_152.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/frozen_vgg_16.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/vgg_16.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/frozen_vgg_19.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/vgg_19.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/frozen_inception_v3.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/inception_v3.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/frozen_inception_v4.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/inception_v4.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/frozen_resenet_v1_50.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/resenet_v1_50.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/frozen_resenet_v1_101.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/resenet_v1_101.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/frozen_resenet_v1_152.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/resenet_v1_152.log
+
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/frozen_vgg_16.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/vgg_16.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/frozen_vgg_19.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/vgg_19.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/frozen_inception_v3.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/inception_v3.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/frozen_inception_v4.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/inception_v4.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/frozen_resenet_v1_50.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/resenet_v1_50.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/frozen_resenet_v1_101.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/resenet_v1_101.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/frozen_resenet_v1_152.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/resenet_v1_152.log
+
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/frozen_vgg_16.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/vgg_16.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/frozen_vgg_19.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/vgg_19.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/frozen_inception_v3.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/inception_v3.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/frozen_inception_v4.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/inception_v4.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/frozen_resenet_v1_50.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/resenet_v1_50.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/frozen_resenet_v1_101.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/resenet_v1_101.log
+$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/frozen_resenet_v1_152.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/resenet_v1_152.log
