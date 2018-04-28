@@ -121,11 +121,11 @@ bazel-bin/tensorflow/python/tools/freeze_graph   --input_graph=$WKDIR/pb/incepti
 cd $WKDIR
 python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_inception_v3.pb --batch 16 --data_type FP32 --scale 255    --reverse_input_channels --output_dir  $MO_MODELS_PATH
 python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_inception_v4.pb --batch 16 --data_type FP32 --scale 255    --reverse_input_channels --output_dir  $MO_MODELS_PATH
-python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_vgg_19.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH
-python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_vgg_16.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH
-python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_resenet_v1_50.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH
-python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_resenet_v1_101.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH
-python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_resenet_v1_152.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH
+python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_vgg_19.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH --reverse_input_channels
+python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_vgg_16.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH --reverse_input_channels
+python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_resenet_v1_50.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH --reverse_input_channels
+python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_resenet_v1_101.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH --reverse_input_channels
+python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_resenet_v1_152.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH --reverse_input_channels
 cd $SAMPLES_PATH
 cmake -DCMAKE_BUILD_TYPE=Release $DLDT_PATH/inference_engine/samples
 make 
