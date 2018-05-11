@@ -25,18 +25,14 @@ wget https://copr.fedorainfracloud.org/coprs/vbatts/bazel/repo/epel-7/vbatts-baz
 sudo mv vbatts-bazel-epel-7.repo /etc/yum.repos.d/
 sudo yum install -y bazel
 sudo yum clean all
-export TF_VERSION=r1.5
 git clone https://github.com/tensorflow/tensorflow.git
 cd tensorflow
-git fetch
-git checkout $TF_VERSION
-export GCC_PATH=/workspace/gcc
-export PATH=$GCC_PATH/bin:$PATH
-export LD_LIBRARY_PATH=$GCC_PATH/lib64:$LD_LIBRARY_PATH
 cat <<EOF >tf.cfg
 /usr/bin/python
 /usr/lib/python2.7/site-packages
-y
+n
+n
+n
 n
 n
 n
