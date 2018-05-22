@@ -4,29 +4,23 @@
 # Please contact vinod.devarampati@intel.com for any clarifications
 # Instructions to fill the variable are given in comments
 ############################################################################
-# Mandatory : Install latest DLDT and intel python 3.5 or later
+# Mandatory : Install latest DLDT from 
+#        - https://software.intel.com/en-us/openvino-toolkit/choose-download
 ############################################################################
-uname -a | grep -i 'Ubuntu' &>/dev/null
-if [ $? -eq 0 ]; then export LINUX="UBUNTU"; else export LINUX="CENTOS"; fi
+# Mention the linux Flavour
+export LINUX="CENTOS"
 #Point to the path where you want to load all files
 export WKDIR=~/cf_inference_demo
-#Point to the path where you want to load all images 
+#Point to the path where you want to load all images
 export DATA_PATH=~/imageNet
 export SAMPLES_PATH=$WKDIR/samples
 export LOGS_PATH=$WKDIR/logs
-export DLDT_PATH=~/intel/deeplearning_deploymenttoolkit_2018.0.8585.0/deployment_tools
-export InferenceEngine_DIR=$DLDT_PATH/inference_engine/share
+export DLDT_PATH=~/intel/computer_vision_sdk_2018.1.249/deployment_tools
 export MO_MODELS_PATH=$WKDIR/mo_models
 export CAFFE_MODELS=$WKDIR/models
-#setup python environment
-if [ $LINUX == "UBUNTU" ]
-then 
-    export PY3_PATH=/usr/local 
-else
-    export PY3_PATH=/opt/intel/intelpython3
-fi
-export LD_LIBRARY_PATH=$PY3_PATH/lib:$DLDT_PATH/inference_engine/external/mklml_lnx/lib:$DLDT_PATH/inference_engine/external/cldnn/lib/:$DLDT_PATH/inference_engine/lib/centos_7.3/intel64/:$DLDT_PATH/inference_engine/lib/ubuntu_16.04/intel64/:$LD_LIBRARY_PATH
-export PATH=$PY3_PATH/bin:$PATH
+source  $DLDT_PATH/../bin/setupvars.sh
+source $DLDT_PATH/model_optimizer/install_prerequisites/install_prerequisites_caffe.sh
+source $DLDT_PATH/model_optimizer/install_prerequisites/../venv/bin/activate
 mkdir -p $WKDIR
 mkdir -p $MO_MODELS_PATH
 mkdir -p $MO_MODELS_PATH
@@ -36,36 +30,6 @@ mkdir -p $LOGS_PATH/BS16
 mkdir -p $LOGS_PATH/BS32
 mkdir -p $SAMPLES_PATH
 cd $WKDIR
-echo "This script assumes that latest DLDT and OPENCV are installed. For Centos Intel python 3.5 or later is required installed"
-if [ $LINUX == "UBUNTU" ]
-then
-    # For Ubuntu
-    sudo apt update
-    sudo apt install -y virtualenv cmake pkg-config zip g++ zlib1g-dev unzip 
-    pip3 install setuptools numpy --upgrade 
-    rm -rf .dldt
-    virtualenv -p /usr/bin/python3 .dldt --system-site-packages 
-    # Bazel for ubuntu
-    bazel version &>/dev/null
-    if ! [ $? -eq 0 ]
-    then
-        wget https://github.com/bazelbuild/bazel/releases/download/0.11.1/bazel-0.11.1-installer-linux-x86_64.sh
-        chmod 777 bazel-0.11.1-installer-linux-x86_64.sh
-        sudo ./bazel-0.11.1-installer-linux-x86_64.sh
-    fi
-else
-    # For CentOS 
-    bazel version &>/dev/null
-    if ! [ $? -eq 0 ]
-    then 
-        wget https://copr.fedorainfracloud.org/coprs/vbatts/bazel/repo/epel-7/vbatts-bazel-epel-7.repo
-	sudo mv vbatts-bazel-epel-7.repo /etc/yum.repos.d/
-    fi
-    sudo yum install -y python-virtualenv cmake numpy bazel
-    sudo yum clean all
-    virtualenv -p /opt/intel/intelpython3/bin/python .dldt --system-site-packages
-fi
-. .dldt/bin/activate
 #download the models 
 if ! [ -d "models" ]
 then 
@@ -81,7 +45,6 @@ then
     wget https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_googlenet/deploy.prototxt; mv deploy.prototxt googlenet_deploy.prototxt
     #download and keep the resnet models manually from the link : https://onedrive.live.com/?authkey=%21AAFW2-FVoxeVRck&id=4006CBB8476FF777%2117887&cid=4006CBB8476FF777
 fi
-pip install -r $DLDT_PATH/model_optimizer/requirements_caffe.txt
 cd $WKDIR
 python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/bvlc_alexnet.caffemodel --batch 1 --data_type FP32  --input_proto $CAFFE_MODELS/alexnet_deploy.prototxt --output_dir  $MO_MODELS_PATH
 python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/bvlc_googlenet.caffemodel --batch 1 --data_type FP32  --input_proto $CAFFE_MODELS/googlenet_deploy.prototxt --output_dir  $MO_MODELS_PATH
@@ -91,33 +54,45 @@ python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_
 python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/ResNet-101-model.caffemodel --batch 1 --data_type FP32  --input_proto $CAFFE_MODELS/ResNet-101-deploy.prototxt  --output_dir  $MO_MODELS_PATH
 python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/ResNet-152-model.caffemodel --batch 1 --data_type FP32  --input_proto $CAFFE_MODELS/ResNet-152-deploy.prototxt  --output_dir  $MO_MODELS_PATH
 python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/inception-v3.caffemodel  --batch 1 --data_type FP32  --input_proto $CAFFE_MODELS/deploy_inception-v3.prototxt  --output_dir  $MO_MODELS_PATH --scale 255
+python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/inception-v4.caffemodel  --batch 1 --data_type FP32  --input_proto $CAFFE_MODELS/deploy_inception-v4.prototxt  --output_dir  $MO_MODELS_PATH --scale 255
+python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/VGG_VOC0712_SSD_300x300_iter_120000.caffemodel  --batch 1 --data_type FP32  --input_proto $CAFFE_MODELS/ssd_vgg_deploy.prototxt  --output_dir  $MO_MODELS_PATH
 
 cd $SAMPLES_PATH
 cmake -DCMAKE_BUILD_TYPE=Release $DLDT_PATH/inference_engine/samples
 make 
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/VGG_ILSVRC_16_layers.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/vgg_16.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/VGG_ILSVRC_19_layers.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/vgg_19.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/bvlc_alexnet.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/alexnet.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/bvlc_googlenet.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/googlenet.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/ResNet-50-model.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/resenet_v1_50.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/ResNet-101-model.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/resenet_v1_101.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/ResNet-152-model.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/resenet_v1_152.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/inception-v3.xml -d CPU -nt 2 -ni 1000 &>$LOGS_PATH/BS1/inception_v3.log
+if [ -z $1 ]
+  then
+    NUMA=""
+else
+    NUMA="numactl -N $1 -m $1"
+fi
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/VGG_ILSVRC_16_layers.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/$1_vgg_16.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/VGG_ILSVRC_19_layers.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/$1_vgg_19.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/bvlc_alexnet.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/$1_alexnet.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/bvlc_googlenet.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/$1_googlenet.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/ResNet-50-model.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/$1_resenet_v1_50.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/ResNet-101-model.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/$1_resenet_v1_101.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/ResNet-152-model.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/$1_resenet_v1_152.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/inception-v3.xml -d CPU -nt 2 -ni 1000 &>$LOGS_PATH/BS1/$1_inception_v3.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/inception-v4.xml -d CPU -nt 2 -ni 1000 &>$LOGS_PATH/BS1/$1_inception_v4.log
+$NUMA $SAMPLES_PATH/intel64/Release/object_detection_sample_ssd  -i $DATA_PATH/1  -m $MO_MODELS_PATH/VGG_VOC0712_SSD_300x300_iter_120000.xml  -d CPU -ni 1000 &>$LOGS_PATH/BS1/$1_ssd_vgg.log
 
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/VGG_ILSVRC_16_layers.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/vgg_16.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/VGG_ILSVRC_19_layers.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/vgg_19.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/bvlc_alexnet.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/alexnet.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/bvlc_googlenet.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/googlenet.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/ResNet-50-model.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/resenet_v1_50.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/ResNet-101-model.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/resenet_v1_101.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/ResNet-152-model.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/resenet_v1_152.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/inception-v3.xml -d CPU -nt 2 -ni 100 &>$LOGS_PATH/BS16/inception_v3.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/VGG_ILSVRC_16_layers.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/$1_vgg_16.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/VGG_ILSVRC_19_layers.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/$1_vgg_19.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/bvlc_alexnet.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/$1_alexnet.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/bvlc_googlenet.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/$1_googlenet.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/ResNet-50-model.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/$1_resenet_v1_50.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/ResNet-101-model.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/$1_resenet_v1_101.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/ResNet-152-model.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/$1_resenet_v1_152.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/inception-v3.xml -d CPU -nt 2 -ni 100 &>$LOGS_PATH/BS16/$1_inception_v3.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/inception-v4.xml -d CPU -nt 2 -ni 100 &>$LOGS_PATH/BS16/$1_inception_v4.log
 
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/VGG_ILSVRC_16_layers.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/vgg_16.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/VGG_ILSVRC_19_layers.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/vgg_19.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/bvlc_alexnet.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/alexnet.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/bvlc_googlenet.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/googlenet.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/ResNet-50-model.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/resenet_v1_50.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/ResNet-101-model.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/resenet_v1_101.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/ResNet-152-model.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/resenet_v1_152.log
-$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/inception-v3.xml -d CPU -nt 2 -ni 100 &>$LOGS_PATH/BS32/inception_v3.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/VGG_ILSVRC_16_layers.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/$1_vgg_16.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/VGG_ILSVRC_19_layers.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/$1_vgg_19.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/bvlc_alexnet.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/$1_alexnet.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/bvlc_googlenet.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/$1_googlenet.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/ResNet-50-model.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/$1_resenet_v1_50.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/ResNet-101-model.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/$1_resenet_v1_101.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/ResNet-152-model.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/$1_resenet_v1_152.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/inception-v3.xml -d CPU -nt 2 -ni 100 &>$LOGS_PATH/BS32/$1_inception_v3.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/inception-v4.xml -d CPU -nt 2 -ni 100 &>$LOGS_PATH/BS32/$1_inception_v4.log
