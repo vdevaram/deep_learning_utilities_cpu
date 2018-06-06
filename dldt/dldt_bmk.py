@@ -11,7 +11,7 @@
 import argparse
 import os
 
-model_tf =  {
+models_tf =  {
    "vgg_16":"frozen_vgg_16.xml",
    "vgg_19":"frozen_vgg_19.xml",
    "inception_v3":"frozen_inception_v3.xml",
@@ -44,6 +44,8 @@ def print_results(args):
       with open(os.path.join(args.log_dir,file_name)) as fp:
         data = fp.read()
         start = data.find("iteration:")+11
+        if start <= 11:
+          continue
         end = data.find(" ",start)
         val = float(data[start:end])
       parse = file_name.split(".")[0].split("_")
