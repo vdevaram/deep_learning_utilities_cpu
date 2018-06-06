@@ -16,9 +16,9 @@ models_tf =  {
    "vgg_19":"frozen_vgg_19.xml",
    "inception_v3":"frozen_inception_v3.xml",
    "inception_v4":"frozen_inception_v4.xml",
-   "resenet_v1_50":"frozen_resenet_v1_50.xml",
-   "resenet_v1_101":"frozen_resenet_v1_101.xml",
-   "resenet_v1_152":"frozen_resenet_v1_152.xml"
+   "resnet_v1_50":"frozen_resnet_v1_50.xml",
+   "resnet_v1_101":"frozen_resnet_v1_101.xml",
+   "resnet_v1_152":"frozen_resnet_v1_152.xml"
     }
 
 models_cf =  {
@@ -48,6 +48,7 @@ def print_results(args):
           continue
         end = data.find(" ",start)
         val = float(data[start:end])
+
       parse = file_name.split(".")[0].split("_")
       if parse[0] == "resnet":
         top = parse[0]+"_"+parse[1]+"_"+parse[2]
@@ -91,6 +92,9 @@ def create_shell_script(args):
   if args.cpu == "skl8180":
     NUM_CORES = 56
     NUM_STREAMS = [1,2,4,8,14,28,56]
+  elif args.cpu == "skl6148":
+    NUM_CORES = 40
+    NUM_STREAMS = [1,2,4,5,8,10,20,40]
 
   if args.fw == "caffe":
     print("export WKDIR=~/cf_inference_demo")
@@ -130,7 +134,7 @@ def create_shell_script(args):
               topology+"_"+str(i)+"_bs"+str(bs)+"_str"+str(ns)+".log &")
       print("echo 'Waiting for "+str(ns)+"-streams to finish'")
       print("sleep 12s")
-      print("~/kp.sh")
+      print("ps -elf | grep  samples | for i in $(awk '{print $4}');do kill -9 $i; done")
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
