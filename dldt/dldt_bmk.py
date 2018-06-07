@@ -28,7 +28,8 @@ models_cf =  {
     "inception_v4":"inception-v4.xml",
     "resnet_v1_50":"ResNet-50-model.xml",
     "resnet_v1_101":"ResNet-101-model.xml",
-    "resnet_v1_152":"ResNet-152-model.xml"
+    "resnet_v1_152":"ResNet-152-model.xml",
+    "ssd_vgg_16": "VGG_VOC0712_SSD_300x300_iter_120000.xml"
     }
 
 
@@ -50,7 +51,7 @@ def print_results(args):
         val = float(data[start:end])
 
       parse = file_name.split(".")[0].split("_")
-      if parse[0] == "resnet":
+      if parse[0] == "resnet" or parse[0] == "ssd":
         top = parse[0]+"_"+parse[1]+"_"+parse[2]
         bs = parse[4]
         stream = parse[5]
@@ -121,6 +122,10 @@ def create_shell_script(args):
     model = model_dict
 
   for topology in model:  
+    if topology == "ssd_vgg_16":
+      executable = "object_detection_sample_ssd"
+    else:
+      executable = "classification_sample"
     for ns in NUM_STREAMS:
       cores_per_stream = NUM_CORES//ns
       print("export OMP_NUM_THREADS="+str(cores_per_stream))
@@ -129,8 +134,8 @@ def create_shell_script(args):
         k = (i+1)*cores_per_stream-1
         
         print('export KMP_AFFINITY="granularity=core,proclist=['+str(j)+"-"+str(k)+\
-             '],explicit,verbose";$SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/'+\
-              str(bs)+' -m $MO_MODELS_PATH/'+model[topology]+' -d CPU -nt 2 -ni 100  &>'+\
+             '],explicit,verbose";$SAMPLES_PATH/intel64/Release/'+executable+' -i $DATA_PATH/'+\
+              str(bs)+' -m $MO_MODELS_PATH/'+model[topology]+' -d CPU -ni 100  &>'+\
               topology+"_"+str(i)+"_bs"+str(bs)+"_str"+str(ns)+".log &")
       print("echo 'Waiting for "+str(ns)+"-streams to finish'")
       print("sleep 12s")
