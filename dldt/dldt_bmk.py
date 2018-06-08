@@ -82,7 +82,7 @@ def print_results(args):
       for stream in topology[top][bs]:
         average_latency = sum(topology[top][bs][stream])/float(len(topology[top][bs][stream]))
         num_streams = float(stream[3:])
-        fps = 1000*num_streams//average_latency
+        fps = int(bs[2:])*1000*num_streams//average_latency
         print(top,"\t\t",bs[2:],"\t",num_streams,"\t",average_latency,"\t",fps)
 
 
@@ -90,12 +90,32 @@ def create_shell_script(args):
   """
   """
 
+  bs = args.batch_size
   if args.cpu == "skl8180":
     NUM_CORES = 56
-    NUM_STREAMS = [1,2,4,8,14,28,56]
+    if bs == 1:
+      NUM_STREAMS = [1,2,4,8,14,28,56]
+    elif bs == 14:
+      NUM_STREAMS = [1,2,4,8]
+    elif bs == 16:
+      NUM_STREAMS = [1,2,4,8]
+    elif bs == 28:
+      NUM_STREAMS = [1,2,4]
+    elif bs == 32:
+      NUM_STREAMS = [1,2,4]
+    elif bs == 56:
+      NUM_STREAMS = [1,2,4]
+
   elif args.cpu == "skl6148":
     NUM_CORES = 40
-    NUM_STREAMS = [1,2,4,5,8,10,20,40]
+    if bs == 1:
+      NUM_STREAMS = [1,2,4,5,8,10,20,40]
+    elif bs == 8:
+      NUM_STREAMS = [1,2,4,5]
+    elif bs == 20:
+      NUM_STREAMS = [1,2,4]
+    elif bs == 40:
+      NUM_STREAMS = [1,2,4]
 
   if args.fw == "caffe":
     print("export WKDIR=~/cf_inference_demo")
@@ -115,7 +135,6 @@ def create_shell_script(args):
   print("source $DLDT_PATH/model_optimizer/install_prerequisites/../venv/bin/activate")
 
 
-  bs = args.batch_size
   if args.topology != "all":
     model = { args.topology : model_dict[args.topology] }
   else:
@@ -138,7 +157,7 @@ def create_shell_script(args):
               str(bs)+' -m $MO_MODELS_PATH/'+model[topology]+' -d CPU -ni 100  &>'+\
               topology+"_"+str(i)+"_bs"+str(bs)+"_str"+str(ns)+".log &")
       print("echo 'Waiting for "+str(ns)+"-streams to finish'")
-      print("sleep 12s")
+      print("sleep 100s")
       print("ps -elf | grep  samples | for i in $(awk '{print $4}');do kill -9 $i; done")
 
 if __name__ == "__main__":
