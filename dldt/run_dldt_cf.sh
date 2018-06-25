@@ -15,7 +15,7 @@ export WKDIR=~/cf_inference_demo
 export DATA_PATH=~/imageNet
 export SAMPLES_PATH=$WKDIR/samples
 export LOGS_PATH=$WKDIR/logs
-export DLDT_PATH=~/intel/computer_vision_sdk_2018.1.249/deployment_tools
+export DLDT_PATH=~/intel/computer_vision_sdk_2018.1.265/deployment_tools
 export MO_MODELS_PATH=$WKDIR/mo_models
 export CAFFE_MODELS=$WKDIR/models
 source  $DLDT_PATH/../bin/setupvars.sh
