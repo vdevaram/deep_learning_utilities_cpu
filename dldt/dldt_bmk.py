@@ -127,7 +127,7 @@ def create_shell_script(args):
   print("export DATA_PATH=~/imageNet")
   print("export SAMPLES_PATH=$WKDIR/samples")
   print("export LOGS_PATH=$WKDIR/logs")
-  print("export DLDT_PATH=~/intel/computer_vision_sdk_2018.1.265/deployment_tools")
+  print("export DLDT_PATH=~/intel/computer_vision_sdk_2018.2.300/deployment_tools")
   print("export MO_MODELS_PATH=$WKDIR/mo_models")
   print("export FROZEN_MODELS=$WKDIR/frozen")
   print("export CAFFE_MODELS=$WKDIR/models")
