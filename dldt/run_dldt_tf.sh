@@ -97,9 +97,9 @@ bazel build tensorflow/python/tools:freeze_graph
 # freeze graph to load into the inference program
 bazel-bin/tensorflow/python/tools/freeze_graph   --input_graph=$WKDIR/pb/vgg_16.pb   --input_checkpoint=$WKDIR/ckpt/vgg_16.ckpt   --input_binary=true --output_graph=$WKDIR/frozen/frozen_vgg_16.pb   --output_node_names=vgg_16/fc8/squeezed
 bazel-bin/tensorflow/python/tools/freeze_graph   --input_graph=$WKDIR/pb/vgg_19.pb   --input_checkpoint=$WKDIR/ckpt/vgg_19.ckpt   --input_binary=true --output_graph=$WKDIR/frozen/frozen_vgg_19.pb   --output_node_names=vgg_19/fc8/squeezed
-bazel-bin/tensorflow/python/tools/freeze_graph   --input_graph=$WKDIR/pb/resnet_v1_50.pb   --input_checkpoint=$WKDIR/ckpt/resnet_v1_50.ckpt   --input_binary=true --output_graph=$WKDIR/frozen/frozen_resenet_v1_50.pb   --output_node_names=resnet_v1_50/predictions/Reshape_1
-bazel-bin/tensorflow/python/tools/freeze_graph   --input_graph=$WKDIR/pb/resnet_v1_101.pb   --input_checkpoint=$WKDIR/ckpt/resnet_v1_101.ckpt   --input_binary=true --output_graph=$WKDIR/frozen/frozen_resenet_v1_101.pb   --output_node_names=resnet_v1_101/predictions/Reshape_1
-bazel-bin/tensorflow/python/tools/freeze_graph   --input_graph=$WKDIR/pb/resnet_v1_152.pb   --input_checkpoint=$WKDIR/ckpt/resnet_v1_152.ckpt   --input_binary=true --output_graph=$WKDIR/frozen/frozen_resenet_v1_152.pb   --output_node_names=resnet_v1_152/predictions/Reshape_1
+bazel-bin/tensorflow/python/tools/freeze_graph   --input_graph=$WKDIR/pb/resnet_v1_50.pb   --input_checkpoint=$WKDIR/ckpt/resnet_v1_50.ckpt   --input_binary=true --output_graph=$WKDIR/frozen/frozen_resnet_v1_50.pb   --output_node_names=resnet_v1_50/predictions/Reshape_1
+bazel-bin/tensorflow/python/tools/freeze_graph   --input_graph=$WKDIR/pb/resnet_v1_101.pb   --input_checkpoint=$WKDIR/ckpt/resnet_v1_101.ckpt   --input_binary=true --output_graph=$WKDIR/frozen/frozen_resnet_v1_101.pb   --output_node_names=resnet_v1_101/predictions/Reshape_1
+bazel-bin/tensorflow/python/tools/freeze_graph   --input_graph=$WKDIR/pb/resnet_v1_152.pb   --input_checkpoint=$WKDIR/ckpt/resnet_v1_152.ckpt   --input_binary=true --output_graph=$WKDIR/frozen/frozen_resnet_v1_152.pb   --output_node_names=resnet_v1_152/predictions/Reshape_1
 bazel-bin/tensorflow/python/tools/freeze_graph   --input_graph=$WKDIR/pb/inception_v3.pb   --input_checkpoint=$WKDIR/ckpt/inception_v3.ckpt   --input_binary=true --output_graph=$WKDIR/frozen/frozen_inception_v3.pb   --output_node_names=InceptionV3/Predictions/Reshape_1
 bazel-bin/tensorflow/python/tools/freeze_graph   --input_graph=$WKDIR/pb/inception_v4.pb   --input_checkpoint=$WKDIR/ckpt/inception_v4.ckpt   --input_binary=true --output_graph=$WKDIR/frozen/frozen_inception_v4.pb   --output_node_names=InceptionV4/Logits/Predictions
 cd $WKDIR
@@ -107,9 +107,9 @@ python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MO
 python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_inception_v4.pb --batch 16 --data_type FP32 --scale 255    --reverse_input_channels --output_dir  $MO_MODELS_PATH
 python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_vgg_19.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH --reverse_input_channels
 python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_vgg_16.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH --reverse_input_channels
-python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_resenet_v1_50.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH --reverse_input_channels
-python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_resenet_v1_101.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH --reverse_input_channels
-python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_resenet_v1_152.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH --reverse_input_channels
+python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_resnet_v1_50.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH --reverse_input_channels
+python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_resnet_v1_101.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH --reverse_input_channels
+python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_resnet_v1_152.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH --reverse_input_channels
 cd $SAMPLES_PATH
 cmake -DCMAKE_BUILD_TYPE=Release $DLDT_PATH/inference_engine/samples
 make 
@@ -123,22 +123,22 @@ $NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO
 $NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/frozen_vgg_19.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/$1_vgg_19.log
 $NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/frozen_inception_v3.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/$1_inception_v3.log
 $NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/frozen_inception_v4.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/$1_inception_v4.log
-$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/frozen_resenet_v1_50.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/$1_resenet_v1_50.log
-$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/frozen_resenet_v1_101.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/$1_resenet_v1_101.log
-$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/frozen_resenet_v1_152.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/$1_resenet_v1_152.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/frozen_resnet_v1_50.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/$1_resenet_v1_50.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/frozen_resnet_v1_101.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/$1_resenet_v1_101.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/frozen_resnet_v1_152.xml -d CPU -nt 2 -ni 1000  &>$LOGS_PATH/BS1/$1_resenet_v1_152.log
 
 $NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/frozen_vgg_16.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/$1_vgg_16.log
 $NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/frozen_vgg_19.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/$1_vgg_19.log
 $NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/frozen_inception_v3.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/$1_inception_v3.log
 $NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/frozen_inception_v4.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/$1_inception_v4.log
-$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/frozen_resenet_v1_50.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/$1_resenet_v1_50.log
-$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/frozen_resenet_v1_101.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/$1_resenet_v1_101.log
-$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/frozen_resenet_v1_152.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/$1_resenet_v1_152.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/frozen_resnet_v1_50.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/$1_resenet_v1_50.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/frozen_resnet_v1_101.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/$1_resenet_v1_101.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/frozen_resnet_v1_152.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/$1_resenet_v1_152.log
 
 $NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/frozen_vgg_16.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/$1_vgg_16.log
 $NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/frozen_vgg_19.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/$1_vgg_19.log
 $NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/frozen_inception_v3.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/$1_inception_v3.log
 $NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/frozen_inception_v4.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/$1_inception_v4.log
-$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/frozen_resenet_v1_50.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/$1_resenet_v1_50.log
-$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/frozen_resenet_v1_101.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/$1_resenet_v1_101.log
-$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/frozen_resenet_v1_152.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/$1_resenet_v1_152.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/frozen_resnet_v1_50.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/$1_resenet_v1_50.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/frozen_resnet_v1_101.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/$1_resenet_v1_101.log
+$NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/32 -m $MO_MODELS_PATH/frozen_resnet_v1_152.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS32/$1_resenet_v1_152.log
