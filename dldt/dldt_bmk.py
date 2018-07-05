@@ -21,6 +21,11 @@ models_tf =  {
    "resnet_v1_152":"frozen_resnet_v1_152.xml"
     }
 
+models_tf_custom =  {
+   "inception_v3":"frozen_inception_v3.xml",
+   "resnet_v1_50":"frozen_resnet_v1_50.xml"
+    }
+
 models_cf =  {
     "vgg_16":"VGG_ILSVRC_16_layers.xml",
     "vgg_19":"VGG_ILSVRC_19_layers.xml",
@@ -32,6 +37,10 @@ models_cf =  {
     "ssd_vgg_16": "VGG_VOC0712_SSD_300x300_iter_120000.xml"
     }
 
+models_cf_custom =  {
+    "inception_v3":"inception-v3.xml",
+    "resnet_v1_50":"ResNet-50-model.xml",
+    }
 
 def print_results(args):
   """
@@ -117,12 +126,44 @@ def create_shell_script(args):
     elif bs == 40:
       NUM_STREAMS = [1,2,4]
 
+  elif args.cpu =="skl6129":
+    NUM_CORES = 32 
+    if bs == 1:
+      NUM_STREAMS = [1,2,4,8,16,32]
+    elif bs == 8:
+      NUM_STREAMS = [1,2,4,8]
+    elif bs == 16:
+      NUM_STREAMS = [1,2,4]
+    elif bs == 32:
+      NUM_STREAMS = [1,2,4]
+    
+  elif args.cpu =="skl5122":
+    NUM_CORES = 8 
+    if bs == 1:
+      NUM_STREAMS = [1,2,4,8]
+    elif bs == 8:
+      NUM_STREAMS = [1,2,4]
+    elif bs == 16:
+      NUM_STREAMS = [1,2]
+    elif bs == 32:
+      NUM_STREAMS = [1,2]
+
   if args.fw == "caffe":
     print("export WKDIR=~/cf_inference_demo")
-    model_dict = models_cf
+    if args.topology == "all":
+      model = models_cf
+    elif args.topology == "custom":
+      model = models_cf_custom
+    else:
+      model = { args.topology : models_cf[args.topology] }
   else: 
-    model_dict = models_tf
     print("export WKDIR=~/tf_inference_demo")
+    if args.topology == "all":
+      model = models_tf
+    elif args.topology == "custom":
+      model = models_tf_custom
+    else:
+      model = { args.topology : models_tf[args.topology] }
 
   print("export DATA_PATH=~/imageNet")
   print("export SAMPLES_PATH=$WKDIR/samples")
@@ -132,13 +173,9 @@ def create_shell_script(args):
   print("export FROZEN_MODELS=$WKDIR/frozen")
   print("export CAFFE_MODELS=$WKDIR/models")
   print("source  $DLDT_PATH/../bin/setupvars.sh")
-  print("source $DLDT_PATH/model_optimizer/install_prerequisites/../venv/bin/activate")
+  #print("source $DLDT_PATH/model_optimizer/install_prerequisites/../venv/bin/activate")
 
 
-  if args.topology != "all":
-    model = { args.topology : model_dict[args.topology] }
-  else:
-    model = model_dict
 
   for topology in model:  
     if topology == "ssd_vgg_16":
@@ -157,12 +194,12 @@ def create_shell_script(args):
               str(bs)+' -m $MO_MODELS_PATH/'+model[topology]+' -d CPU -ni 100  &>'+\
               topology+"_"+str(i)+"_bs"+str(bs)+"_str"+str(ns)+".log &")
       print("echo 'Waiting for "+str(ns)+"-streams to finish'")
-      print("sleep 100s")
+      print("sleep 11s")
       print("ps -elf | grep  samples | for i in $(awk '{print $4}');do kill -9 $i; done")
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
-  parser.add_argument("--cpu", default="skl8180", help="SKU name")
+  parser.add_argument("--cpu", default="skl6148", help="SKU name")
   parser.add_argument("--topology", default="resnet_v1_50", help=" topology name")
   parser.add_argument("--fw", default="caffe", help="caffe/tf")
   parser.add_argument("--batch_size", type=int, default=1, help="i Batch size")
