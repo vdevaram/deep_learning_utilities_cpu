@@ -76,6 +76,7 @@ $NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO
 $NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/inception-v3.xml -d CPU -nt 2 -ni 1000 &>$LOGS_PATH/BS1/$1_inception_v3.log
 $NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/1 -m $MO_MODELS_PATH/inception-v4.xml -d CPU -nt 2 -ni 1000 &>$LOGS_PATH/BS1/$1_inception_v4.log
 $NUMA $SAMPLES_PATH/intel64/Release/object_detection_sample_ssd  -i $DATA_PATH/1  -m $MO_MODELS_PATH/VGG_VOC0712_SSD_300x300_iter_120000.xml  -d CPU -ni 1000 &>$LOGS_PATH/BS1/$1_ssd_vgg.log
+$NUMA $SAMPLES_PATH/intel64/Release/object_detection_sample -i ~/tumblr_mcof3drMto1qhp1gp.jpg -m $MO_MODELS_PATH/VGG16_faster_rcnn_final.xml -d CPU -ni 1000 &>$LOGS_PATH/BS1/$1_frcnn_vgg.log
 
 $NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/VGG_ILSVRC_16_layers.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/$1_vgg_16.log
 $NUMA $SAMPLES_PATH/intel64/Release/classification_sample -i $DATA_PATH/16 -m $MO_MODELS_PATH/VGG_ILSVRC_19_layers.xml -d CPU -nt 2 -ni 100  &>$LOGS_PATH/BS16/$1_vgg_19.log
