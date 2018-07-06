@@ -56,7 +56,8 @@ python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_
 python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/inception-v3.caffemodel  --batch 1 --data_type FP32  --input_proto $CAFFE_MODELS/deploy_inception-v3.prototxt  --output_dir  $MO_MODELS_PATH --scale 255
 python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/inception-v4.caffemodel  --batch 1 --data_type FP32  --input_proto $CAFFE_MODELS/deploy_inception-v4.prototxt  --output_dir  $MO_MODELS_PATH --scale 255
 python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/VGG_VOC0712_SSD_300x300_iter_120000.caffemodel  --batch 1 --data_type FP32  --input_proto $CAFFE_MODELS/ssd_vgg_deploy.prototxt  --output_dir  $MO_MODELS_PATH
-python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/VGG16_faster_rcnn_final.caffemodel --batch 1 --data_type FP32  --input_proto $CAFFE_MODELS/test.prototxt --output_dir  $MO_MODELS_PATH --extensions $DLDT_PATH/inference_engine/samples/object_detection_sample/fasterrcnn_extensions
+python3 $DLDT_PATH/model_optimizer/mo.py --framework caffe --input_model $CAFFE_MODELS/VGG16_faster_rcnn_final.caffemodel --batch 1 --data_type FP32  --input_proto $CAFFE_MODELS/test.prototxt --output_dir  $MO_MODELS_PATH
+
 cd $SAMPLES_PATH
 cmake -DCMAKE_BUILD_TYPE=Release $DLDT_PATH/inference_engine/samples
 make 
