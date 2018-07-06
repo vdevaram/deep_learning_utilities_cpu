@@ -110,6 +110,7 @@ python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MO
 python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_resnet_v1_50.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH --reverse_input_channels
 python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_resnet_v1_101.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH --reverse_input_channels
 python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_resnet_v1_152.pb --batch 16 --data_type FP32 --output_dir  $MO_MODELS_PATH --reverse_input_channels
+ python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model $FROZEN_MODELS/frozen_frcnn_res50_graph.pb     --output_dir  $MO_MODELS_PATH --output=detection_boxes,detection_scores,num_detections --tensorflow_use_custom_operations_config /home/vinod/intel/computer_vision_sdk_2018.2.300/deployment_tools/model_optimizer/extensions/front/tf/faster_rcnn_support.json
 cd $SAMPLES_PATH
 cmake -DCMAKE_BUILD_TYPE=Release $DLDT_PATH/inference_engine/samples
 make 
