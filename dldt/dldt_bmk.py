@@ -18,10 +18,12 @@ models_tf =  {
    "inception_v4":"frozen_inception_v4.xml",
    "resnet_v1_50":"frozen_resnet_v1_50.xml",
    "resnet_v1_101":"frozen_resnet_v1_101.xml",
-   "resnet_v1_152":"frozen_resnet_v1_152.xml"
+   "resnet_v1_152":"frozen_resnet_v1_152.xml",
+   "frcnn_res_50":"frozen_frcnn_res50.xml"
     }
 
 models_tf_custom =  {
+   "frcnn_res_50":"frozen_frcnn_res50.xml",
    "inception_v3":"frozen_inception_v3.xml",
    "resnet_v1_50":"frozen_resnet_v1_50.xml"
     }
@@ -60,7 +62,7 @@ def print_results(args):
         val = float(data[start:end])
 
       parse = file_name.split(".")[0].split("_")
-      if parse[0] == "resnet" or parse[0] == "ssd":
+      if parse[0] == "resnet" or parse[0] == "ssd" or parse[0] == "frcnn":
         top = parse[0]+"_"+parse[1]+"_"+parse[2]
         bs = parse[4]
         stream = parse[5]
@@ -178,7 +180,7 @@ def create_shell_script(args):
 
 
   for topology in model:  
-    if topology == "ssd_vgg_16":
+    if topology == "ssd_vgg_16" or topology == "frcnn_res_50": 
       executable = "object_detection_sample_ssd"
     else:
       executable = "classification_sample"
