@@ -13,7 +13,7 @@ python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model frozen_dar
  python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model frozen_darknet_yolov3_tiny_model.pb --tensorflow_use_custom_operations_config yolo_v3_tiny.json --batch 1
 
 #yolo_v3_tiny.json contents: 
-: '
+: `
 [
   {
     "id": "TFYOLOV3",
@@ -28,8 +28,8 @@ python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model frozen_dar
     }
   }
 ]
-'
-: '
+`
+: `
 # yolo_v3.json contents: 
 
 [
@@ -45,4 +45,4 @@ python3 $DLDT_PATH/model_optimizer/mo.py --framework tf --input_model frozen_dar
     }
   }
 ]
-'
+`
