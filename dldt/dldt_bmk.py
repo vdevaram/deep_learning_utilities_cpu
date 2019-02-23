@@ -1,10 +1,10 @@
 ###########################################################################
-# This is a sample script file to run Caffe/TF inference benchmarks with 
+# This is a sample script file to run Caffe/TF inference benchmarks with
 # mkldnn library on Intel CPUs using DLDT tool
 # Please contact vinod.devarampati@intel.com for any clarifications
 # Instructions to fill the variable are given in comments
 ############################################################################
-# Mandatory : Install latest DLDT from 
+# Mandatory : Install latest DLDT from
 #        - https://software.intel.com/en-us/openvino-toolkit/choose-download
 ############################################################################
 
@@ -19,13 +19,26 @@ models_tf =  {
    "resnet_v1_50":"frozen_resnet_v1_50.xml",
    "resnet_v1_101":"frozen_resnet_v1_101.xml",
    "resnet_v1_152":"frozen_resnet_v1_152.xml",
-   "frcnn_res_50":"frozen_frcnn_res50.xml"
+   "frcnn_res_50":"frozen_frcnn_res50.xml",
+   "i8_inception_v3":"frozen_inception_v3_i8.xml",
+   "i8_resnet_v1_50":"frozen_resnet_v1_50_i8.xml",
+   "i8_inception_resnet_v2":"frozen_inception_resnet_v2_i8.xml",
     }
 
 models_tf_custom =  {
-   "frcnn_res_50":"frozen_frcnn_res50.xml",
    "inception_v3":"frozen_inception_v3.xml",
-   "resnet_v1_50":"frozen_resnet_v1_50.xml"
+   "resnet_v1_50":"frozen_resnet_v1_50.xml",
+   "inception_resnet_v2":"frozen_inception_resnet_v2.xml",
+   "frcnn_res_50":"frozen_frcnn_resnet50.xml",
+   "ssd_mobilenet":"frozen_ssd_mobnet.xml",
+   #"yolo_v2":"frozen_darknet_yolov2_model.xml",
+   #"yolo_tiny_v2":"frozen_yolov2-tiny-voc.xml",
+   #"yolo_v3":"frozen_darknet_yolov3_model.xml",
+   #"yolo_tiny_v3":"frozen_darknet_yolov3_tiny_model.xml",
+   "rfcn":"frozen_rfcn_graph.xml",
+   "i8_inception_v3":"frozen_inception_v3_i8.xml",
+   "i8_resnet_v1_50":"frozen_resnet_v1_50_i8.xml",
+   "i8_inception_resnet_v2":"frozen_inception_resnet_v2_i8.xml",
     }
 
 models_cf =  {
@@ -42,6 +55,7 @@ models_cf =  {
 models_cf_custom =  {
     "inception_v3":"inception-v3.xml",
     "resnet_v1_50":"ResNet-50-model.xml",
+    "ssd_vgg_16": "VGG_VOC0712_SSD_300x300_iter_120000.xml"
     }
 
 def print_results(args):
@@ -62,20 +76,33 @@ def print_results(args):
         val = float(data[start:end])
 
       parse = file_name.split(".")[0].split("_")
-      if parse[0] == "resnet" or parse[0] == "ssd" or parse[0] == "frcnn":
+      if args.data_type == "i8":
+        if parse[0] == "i8" :
+          parse = parse[1:]
+        else:
+          continue
+      else:
+        if parse[0] == "i8":
+            continue
+
+      if parse[0] == "resnet" or parse[0] == "frcnn" or parse[1] == "resnet":
         top = parse[0]+"_"+parse[1]+"_"+parse[2]
         bs = parse[4]
         stream = parse[5]
-      elif parse[0] == "vgg" or parse[0] == "inception":
+      elif parse[0] == "vgg" or parse[0] == "inception" or parse[0] == "ssd":
         top = parse[0]+"_"+parse[1]
         bs = parse[3]
         stream = parse[4]
+      elif parse[0] == "rfcn":
+        top = parse[0]
+        bs = parse[2]
+        stream = parse[3]
 
       if topology.get(top) != None:
         if topology[top].get(bs) != None:
           if topology[top][bs].get(stream) != None:
             topology[top][bs][stream].append(val)
-          else: 
+          else:
             topology[top][bs][stream] = []
             topology[top][bs][stream].append(val)
         else:
@@ -117,7 +144,7 @@ def create_shell_script(args):
     elif bs == 56:
       NUM_STREAMS = [1,2,4]
 
-  elif args.cpu == "skl6148":
+  elif args.cpu == "skl6148" or "clx6248":
     NUM_CORES = 40
     if bs == 1:
       NUM_STREAMS = [1,2,4,5,8,10,20,40]
@@ -129,7 +156,7 @@ def create_shell_script(args):
       NUM_STREAMS = [1,2,4]
 
   elif args.cpu =="skl6129":
-    NUM_CORES = 32 
+    NUM_CORES = 32
     if bs == 1:
       NUM_STREAMS = [1,2,4,8,16,32]
     elif bs == 8:
@@ -138,9 +165,9 @@ def create_shell_script(args):
       NUM_STREAMS = [1,2,4]
     elif bs == 32:
       NUM_STREAMS = [1,2,4]
-    
+
   elif args.cpu =="skl5122":
-    NUM_CORES = 8 
+    NUM_CORES = 8
     if bs == 1:
       NUM_STREAMS = [1,2,4,8]
     elif bs == 8:
@@ -150,16 +177,17 @@ def create_shell_script(args):
     elif bs == 32:
       NUM_STREAMS = [1,2]
 
+  print("export WKDIR=~/dldt")
   if args.fw == "caffe":
-    print("export WKDIR=~/cf_inference_demo")
+    print("export MO_MODELS_PATH=$WKDIR/cf_mo_models")
     if args.topology == "all":
       model = models_cf
     elif args.topology == "custom":
       model = models_cf_custom
     else:
       model = { args.topology : models_cf[args.topology] }
-  else: 
-    print("export WKDIR=~/tf_inference_demo")
+  else:
+    print("export MO_MODELS_PATH=$WKDIR/tf_mo_models")
     if args.topology == "all":
       model = models_tf
     elif args.topology == "custom":
@@ -167,36 +195,33 @@ def create_shell_script(args):
     else:
       model = { args.topology : models_tf[args.topology] }
 
-  print("export DATA_PATH=~/imageNet")
+  LOGS_PATH="$WKDIR/logs"
+  print("export DATA_PATH=$WKDIR/imageNet")
   print("export SAMPLES_PATH=$WKDIR/samples")
-  print("export LOGS_PATH=$WKDIR/logs")
-  print("export DLDT_PATH=~/intel/computer_vision_sdk_2018.2.300/deployment_tools")
-  print("export MO_MODELS_PATH=$WKDIR/mo_models")
-  print("export FROZEN_MODELS=$WKDIR/frozen")
-  print("export CAFFE_MODELS=$WKDIR/models")
+  print("export DLDT_PATH=~/intel/computer_vision_sdk/deployment_tools")
   print("source  $DLDT_PATH/../bin/setupvars.sh")
-  #print("source $DLDT_PATH/model_optimizer/install_prerequisites/../venv/bin/activate")
 
 
-
-  for topology in model:  
-    if topology == "ssd_vgg_16" or topology == "frcnn_res_50": 
+  for topology in model:
+    if topology == "ssd_mobilenet" or topology == "frcnn_res_50" or topology == "rfcn":
       executable = "object_detection_sample_ssd"
+      sleep_time = "21s"
     else:
       executable = "classification_sample"
+      sleep_time = "11s"
     for ns in NUM_STREAMS:
       cores_per_stream = NUM_CORES//ns
       print("export OMP_NUM_THREADS="+str(cores_per_stream))
       for i in range(ns):
         j = i*cores_per_stream
         k = (i+1)*cores_per_stream-1
-        
+
+        log_file = os.path.join(LOGS_PATH,topology+"_"+str(i)+"_bs"+str(bs)+"_str"+str(ns)+".log &")
         print('export KMP_AFFINITY="granularity=core,proclist=['+str(j)+"-"+str(k)+\
              '],explicit,verbose";$SAMPLES_PATH/intel64/Release/'+executable+' -i $DATA_PATH/'+\
-              str(bs)+' -m $MO_MODELS_PATH/'+model[topology]+' -d CPU -ni 100  &>'+\
-              topology+"_"+str(i)+"_bs"+str(bs)+"_str"+str(ns)+".log &")
+              str(bs)+' -m $MO_MODELS_PATH/'+model[topology]+' -d CPU -ni 100  &>'+log_file)
       print("echo 'Waiting for "+str(ns)+"-streams to finish'")
-      print("sleep 11s")
+      print("sleep "+sleep_time)
       print("ps -elf | grep  samples | for i in $(awk '{print $4}');do kill -9 $i; done")
 
 if __name__ == "__main__":
@@ -206,6 +231,7 @@ if __name__ == "__main__":
   parser.add_argument("--fw", default="caffe", help="caffe/tf")
   parser.add_argument("--batch_size", type=int, default=1, help="i Batch size")
   parser.add_argument("--mode", type=str, default="exe", help="exe/log")
+  parser.add_argument("--data_type", type=str, default="f32", help="f32/f16/i8")
   parser.add_argument("--log_dir", type=str, default="./", help="logs directory")
   args = parser.parse_args()
   if args.mode == "exe":
