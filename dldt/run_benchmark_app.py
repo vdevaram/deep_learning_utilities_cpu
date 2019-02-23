@@ -63,37 +63,25 @@ def print_results(args):
     if file_name.endswith(".log"):
       with open(os.path.join(args.log_dir,file_name)) as fp:
         data = fp.read()
-        start = data.find("Throughput:")+12
-        if start <= 12:
+        start = data.find("iteration:")+11
+        if start <= 11:
           continue
         end = data.find(" ",start)
         val = float(data[start:end])
 
       parse = file_name.split(".")[0].split("_")
-      if parse[0] == "resnet" or parse[0] == "frcnn" or parse[1] == "resnet" or parse[1] == "tiny":
+      if parse[0] == "resnet" or parse[0] == "frcnn" or parse[1] == "resnet":
         top = parse[0]+"_"+parse[1]+"_"+parse[2]
-        bs = parse[3]
-        sync_type = parse[4]
-        if sync_type != "sync":
-          stream = parse[5]
-        else:
-          stream = "req0"
-      elif parse[0] == "vgg" or parse[0] == "inception" or parse[0] == "ssd" or parse[0] == "yolo":
+        bs = parse[4]
+        stream = parse[5]
+      elif parse[0] == "vgg" or parse[0] == "inception" or parse[0] == "ssd":
         top = parse[0]+"_"+parse[1]
-        bs = parse[2]
-        sync_type = parse[3]
-        if sync_type != "sync":
-          stream = parse[4]
-        else:
-          stream = "req0"
+        bs = parse[3]
+        stream = parse[4]
       elif parse[0] == "rfcn":
         top = parse[0]
-        bs = parse[1]
-        sync_type = parse[2]
-        if sync_type != "sync":
-          stream = parse[3]
-        else:
-          stream = "req0"
+        bs = parse[2]
+        stream = parse[3]
 
       if topology.get(top) != None:
         if topology[top].get(bs) != None:
@@ -115,11 +103,10 @@ def print_results(args):
   for top in topology:
     for bs in topology[top]:
       for stream in topology[top][bs]:
-        num_streams = int(stream[3:])
-        if num_streams != 0:
-         print(top,"\t\t",bs[2:],"\t",num_streams,"\t",topology[top][bs][stream][0])
-        else:
-         print(top,"\t\t",bs[2:],"\t","sync","\t",topology[top][bs][stream][0],"\t",1000/topology[top][bs][stream][0])
+        average_latency = sum(topology[top][bs][stream])/float(len(topology[top][bs][stream]))
+        num_streams = float(stream[3:])
+        fps = int(bs[2:])*1000*num_streams//average_latency
+        print(top,"\t\t",bs[2:],"\t",num_streams,"\t",average_latency,"\t",fps)
 
 
 def create_shell_script(args):
