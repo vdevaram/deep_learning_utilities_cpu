@@ -19,7 +19,10 @@ models_tf =  {
    "resnet_v1_50":"frozen_resnet_v1_50.xml",
    "resnet_v1_101":"frozen_resnet_v1_101.xml",
    "resnet_v1_152":"frozen_resnet_v1_152.xml",
-   "frcnn_res_50":"frozen_frcnn_res50.xml"
+   "frcnn_res_50":"frozen_frcnn_res50.xml",
+   "i8_inception_v3":"frozen_inception_v3_i8.xml",
+   "i8_resnet_v1_50":"frozen_resnet_v1_50_i8.xml",
+   "i8_inception_resnet_v2":"frozen_inception_resnet_v2_i8.xml",
     }
 
 models_tf_custom =  {
@@ -33,6 +36,9 @@ models_tf_custom =  {
    "yolo_v3":"frozen_darknet_yolov3_model.xml",
    "yolo_tiny_v3":"frozen_darknet_yolov3_tiny_model.xml",
    "rfcn":"frozen_rfcn_graph.xml",
+   "i8_inception_v3":"frozen_inception_v3_i8.xml",
+   "i8_resnet_v1_50":"frozen_resnet_v1_50_i8.xml",
+   "i8_inception_resnet_v2":"frozen_inception_resnet_v2_i8.xml",
     }
 
 models_cf =  {
@@ -63,25 +69,47 @@ def print_results(args):
     if file_name.endswith(".log"):
       with open(os.path.join(args.log_dir,file_name)) as fp:
         data = fp.read()
-        start = data.find("iteration:")+11
-        if start <= 11:
+        start = data.find("Throughput:")+12
+        if start <= 12:
           continue
         end = data.find(" ",start)
         val = float(data[start:end])
 
       parse = file_name.split(".")[0].split("_")
-      if parse[0] == "resnet" or parse[0] == "frcnn" or parse[1] == "resnet":
+
+      if args.data_type == "i8":
+        if parse[0] == "i8" :
+          parse = parse[1:]
+        else:
+          continue
+      else:
+        if parse[0] == "i8":
+            continue
+
+      if parse[0] == "resnet" or parse[0] == "frcnn" or parse[1] == "resnet" or parse[1] == "tiny":
         top = parse[0]+"_"+parse[1]+"_"+parse[2]
-        bs = parse[4]
-        stream = parse[5]
-      elif parse[0] == "vgg" or parse[0] == "inception" or parse[0] == "ssd":
-        top = parse[0]+"_"+parse[1]
         bs = parse[3]
-        stream = parse[4]
+        sync_type = parse[4]
+        if sync_type != "sync":
+          stream = parse[5]
+        else:
+          stream = "req0"
+      elif parse[0] == "vgg" or parse[0] == "inception" or parse[0] == "ssd" or parse[0] == "yolo":
+        top = parse[0]+"_"+parse[1]
+        bs = parse[2]
+        sync_type = parse[3]
+        if sync_type != "sync":
+          stream = parse[4]
+        else:
+          stream = "req0"
       elif parse[0] == "rfcn":
         top = parse[0]
-        bs = parse[2]
-        stream = parse[3]
+        bs = parse[1]
+        sync_type = parse[2]
+        if sync_type != "sync":
+          stream = parse[3]
+        else:
+          stream = "req0"
 
       if topology.get(top) != None:
         if topology[top].get(bs) != None:
@@ -103,10 +131,11 @@ def print_results(args):
   for top in topology:
     for bs in topology[top]:
       for stream in topology[top][bs]:
-        average_latency = sum(topology[top][bs][stream])/float(len(topology[top][bs][stream]))
-        num_streams = float(stream[3:])
-        fps = int(bs[2:])*1000*num_streams//average_latency
-        print(top,"\t\t",bs[2:],"\t",num_streams,"\t",average_latency,"\t",fps)
+        num_streams = int(stream[3:])
+        if num_streams != 0:
+         print(top,"\t\t",bs[2:],"\t",num_streams,"\t",topology[top][bs][stream][0])
+        else:
+         print(top,"\t\t",bs[2:],"\t","sync","\t",topology[top][bs][stream][0],"\t",1000/topology[top][bs][stream][0])
 
 
 def create_shell_script(args):
@@ -135,11 +164,11 @@ def create_shell_script(args):
   LOGS_PATH="$WKDIR/logs"
   print("export DATA_PATH=$WKDIR/imageNet")
   print("export SAMPLES_PATH=$WKDIR/samples")
-  print("export DLDT_PATH=~/intel/computer_vision_sdk/deployment_tools")
+  print("export DLDT_PATH=/opt/intel/computer_vision_sdk/deployment_tools")
   print("source  $DLDT_PATH/../bin/setupvars.sh")
 
 
-  if args.cpu == "skl6148" or "skl6248":
+  if args.cpu == "skl6148" or args.cpu == "clx6248":
     NUM_CORES = 40
     if bs == 1:
       NUM_STREAMS = [1,2,4,5,8,10,20,40]
@@ -148,6 +177,17 @@ def create_shell_script(args):
     elif bs == 20:
       NUM_STREAMS = [1,2,4]
     elif bs == 40:
+      NUM_STREAMS = [1,2,4]
+
+  elif args.cpu == "skl6140" or args.cpu == "clx6240":
+    NUM_CORES = 36
+    if bs == 1:
+      NUM_STREAMS = [1,2,3,4,6,9,18,36]
+    elif bs == 9:
+      NUM_STREAMS = [1,2,4]
+    elif bs == 18:
+      NUM_STREAMS = [1,2,4]
+    elif bs == 36:
       NUM_STREAMS = [1,2,4]
 
   for topology in model:
@@ -181,6 +221,7 @@ if __name__ == "__main__":
   parser.add_argument("--fw", default="caffe", help="caffe/tf")
   parser.add_argument("--batch_size", type=int, default=1, help="i Batch size")
   parser.add_argument("--mode", type=str, default="exe", help="exe/log")
+  parser.add_argument("--data_type", type=str, default="f32", help="f32/f16/i8")
   parser.add_argument("--log_dir", type=str, default="./", help="logs directory")
   args = parser.parse_args()
   if args.mode == "exe":
