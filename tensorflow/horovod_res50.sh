@@ -1,3 +1,8 @@
+export TF_BENCH=/home/vinod/tf/
+export TF_RECORDS=/home/vinod/tf/tf_records/
+export PATH=/usr/lib64/openmpi/bin/:$PATH
+export LD_LIBRARY_PATH=/usr/lib64/openmpi/lib/:$LD_LIBRARY_PATH
+
 # single node without MPI settings - 2S Xeon 6148
 
 numactl -l  python -u $TF_BENCH/benchmarks/scripts/tf_cnn_benchmarks/tf_cnn_benchmarks.py --model resnet50 --batch_size 64 --num_batches 40 --distortions=False --local_parameter_device cpu  --num_intra_threads 40 --num_inter_threads 2 --data_dir $TF_RECORDS --data_name imagenet
