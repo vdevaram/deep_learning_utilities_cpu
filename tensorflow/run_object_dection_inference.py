@@ -11,7 +11,7 @@ import argparse
 from distutils.version import StrictVersion
 from collections import defaultdict
 from io import StringIO
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 from PIL import Image
 
 sys.path.append("..")
@@ -50,8 +50,8 @@ def load_image_into_numpy_array(image):
 def run_inference_for_single_image(image, graph, args):
   config = tf.ConfigProto()
   config.allow_soft_placement = True
-  config.intra_op_parallelism_threads = 18
-  config.inter_op_parallelism_threads = 2
+  config.intra_op_parallelism_threads = args.intra_op_threads 
+  config.inter_op_parallelism_threads =  args.inter_op_threads
   config.experimental.use_numa_affinity = True
 
   with graph.as_default():
@@ -90,12 +90,16 @@ def run_inference_for_single_image(image, graph, args):
         start = time.time()
         for i in range(100):
           output_dict = sess.run(tensor_dict,
-                          feed_dict={image_tensor: np.expand_dims(image, 0)})
+                          feed_dict={image_tensor: image})
+                          #feed_dict={image_tensor: np.expand_dims(image, 0)})
         duration = time.time() - start
         print("Time for iteration is ", duration*10," ms and FPS is ", 100/duration," images/sec") 
       else :
+        start = time.time()
         output_dict = sess.run(tensor_dict,
                         feed_dict={image_tensor: np.expand_dims(image, 0)})
+        duration = time.time() - start
+        print("Time for iteration is ", duration," s and FPS is ", 1/duration," images/sec") 
 
       # all outputs are float32 numpy arrays, so convert types as appropriate
       output_dict['num_detections'] = int(output_dict['num_detections'][0])
@@ -114,6 +118,10 @@ if __name__ == "__main__":
   parser.add_argument("--labels", help="name of file containing labels")
   parser.add_argument("--topology", help="Topology")
   parser.add_argument("--benchmark", help="benchmark list of topologies")
+  parser.add_argument("--inter_op_threads", type=int, default=0, help="number of threads for inter op parallelism")
+  parser.add_argument("--intra_op_threads", type=int, default=0, help="number of threads for intra op parallelism")
+
+
 
   args = parser.parse_args()
 
@@ -154,7 +162,7 @@ if __name__ == "__main__":
     # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
     image_np_expanded = np.expand_dims(image_np, axis=0)
     # Actual detection.
-    output_dict = run_inference_for_single_image(image_np, detection_graph, args)
+    output_dict = run_inference_for_single_image(image_np_expanded, detection_graph, args)
     # Visualization of the results of a detection.
     vis_util.visualize_boxes_and_labels_on_image_array(
       image_np,
@@ -166,6 +174,6 @@ if __name__ == "__main__":
       use_normalized_coordinates=True,
       line_thickness=8)
     #plt.figure(figsize=IMAGE_SIZE)
-    plt.imsave(path.split('.')[0]+"_"+args.topology+".png",image_np)
+    #plt.imsave(path.split('.')[0]+"_"+args.topology+".png",image_np)
     if args.benchmark :
         break;
