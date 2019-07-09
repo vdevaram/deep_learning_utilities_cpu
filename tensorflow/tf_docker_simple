@@ -1,0 +1,14 @@
+# use centos 7
+FROM centos:7.6.1810
+RUN yum install -y epel-release
+#install required libs
+RUN yum install -y \
+  wget \
+  python36-pip \
+  git \
+  numactl
+
+RUN yum clean all
+RUN /bin/bash -c "pip3 install intel-tensorflow"
+RUN /bin/bash -c "pip3 install jupyter"
+CMD jupyter notebook --ip 0.0.0.0 --allow-root  --no-browser
