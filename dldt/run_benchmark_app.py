@@ -10,53 +10,98 @@
 
 import argparse
 import os
+from operator import itemgetter
+MODEL_OBJ_PATH = "/home/vinod/dldt/object_detection/"
+MODEL_CLS_PATH = "/home/vinod/dldt/image_classification/frozen/"
+SAMPLES_COMMON_PATH = "/home/vinod/dldt/samples/intel64/Release/"
 
-models_tf =  {
-   "vgg_16":"frozen_vgg_16.xml",
-   "vgg_19":"frozen_vgg_19.xml",
-   "inception_v3":"frozen_inception_v3.xml",
-   "inception_v4":"frozen_inception_v4.xml",
-   "resnet_v1_50":"frozen_resnet_v1_50.xml",
-   "resnet_v1_101":"frozen_resnet_v1_101.xml",
-   "resnet_v1_152":"frozen_resnet_v1_152.xml",
-   "frcnn_res_50":"frozen_frcnn_res50.xml",
-   "i8_inception_v3":"frozen_inception_v3_i8.xml",
-   "i8_resnet_v1_50":"frozen_resnet_v1_50_i8.xml",
-   "i8_inception_resnet_v2":"frozen_inception_resnet_v2_i8.xml",
+models =  {\
+    "MASK_RCNN_RES50": 
+    [ MODEL_OBJ_PATH + "mask_rcnn_resnet50_atrous_coco_2018_01_28/frozen_inference_graph.xml", 
+      SAMPLES_COMMON_PATH + "mask_rcnn_demo"],
+    "MASK_RCNN_RES101": 
+    [ MODEL_OBJ_PATH + "mask_rcnn_resnet101_atrous_coco_2018_01_28/frozen_inference_graph.xml",
+      SAMPLES_COMMON_PATH + "mask_rcnn_demo"],
+    "FRCNN_RES50": 
+    [ MODEL_OBJ_PATH + "faster_rcnn_resnet50_coco_2018_01_28/frozen_inference_graph.xml",
+      SAMPLES_COMMON_PATH + "object_detection_sample_ssd"],
+    "FRCNN_RES101": 
+    [ MODEL_OBJ_PATH + "faster_rcnn_resnet101_coco_2018_01_28/frozen_inference_graph.xml",
+      SAMPLES_COMMON_PATH + "object_detection_sample_ssd"],
+    "RFCN_RES101": 
+    [ MODEL_OBJ_PATH + "rfcn_resnet101_coco_2018_01_28/frozen_inference_graph.xml",
+      SAMPLES_COMMON_PATH + "object_detection_sample_ssd"],
+    "SSD_MOB_V2": 
+    [ MODEL_OBJ_PATH + "ssd_mobilenet_v2_coco_2018_03_29/frozen_inference_graph.xml",
+      SAMPLES_COMMON_PATH + "object_detection_sample_ssd"],
+    "I8_FRCNN_RES50": 
+    [ MODEL_OBJ_PATH + "faster_rcnn_resnet50_coco_2018_01_28/frozen_inference_graph_i8.xml",
+      SAMPLES_COMMON_PATH + "object_detection_sample_ssd"],
+    "I8_FRCNN_RES101": 
+    [ MODEL_OBJ_PATH + "faster_rcnn_resnet101_coco_2018_01_28/frozen_inference_graph_i8.xml",
+      SAMPLES_COMMON_PATH + "object_detection_sample_ssd"],
+    "I8_RFCN_RES101": 
+    [ MODEL_OBJ_PATH + "rfcn_resnet101_coco_2018_01_28/frozen_inference_graph_i8.xml",
+      SAMPLES_COMMON_PATH + "object_detection_sample_ssd"],
+    "I8_SSD_MOB_V2": 
+    [ MODEL_OBJ_PATH + "ssd_mobilenet_v2_coco_2018_03_29/frozen_inference_graph_i8.xml",
+      SAMPLES_COMMON_PATH + "object_detection_sample_ssd"],
+    "I8_MASK_RCNN_RES50": 
+    [ MODEL_OBJ_PATH + "imask_rcnn_resnet50_atrous_coco_2018_01_28/frozen_inference_graph.xml",
+      SAMPLES_COMMON_PATH + "mask_rcnn_demo"],
+    "I8_MASK_RCNN_RES101": 
+    [ MODEL_OBJ_PATH + "mask_rcnn_resnet101_atrous_coco_2018_01_28/frozen_inference_graph.xml",
+      SAMPLES_COMMON_PATH + "mask_rcnn_demo"],
+    "INCEPTION_V3": 
+    [ MODEL_CLS_PATH + "frozen_inception_v3.xml", 
+      SAMPLES_COMMON_PATH + "classification_sample"],
+    "INCEPTION_V4": 
+    [ MODEL_CLS_PATH + "frozen_inception_v4",
+      SAMPLES_COMMON_PATH + "classification_sample"],
+    "RESNET_V1_50": 
+    [ MODEL_CLS_PATH + "frozen_resnet_v1_50.xml",
+      SAMPLES_COMMON_PATH + "classification_sample"],
+    "RESNET_V1_101": 
+    [ MODEL_CLS_PATH + "frozen_resnet_v1_101.xml",
+      SAMPLES_COMMON_PATH + "classification_sample"],
+    "RESNET_V1_152": 
+    [ MODEL_CLS_PATH + "frozen_resnet_v1_152.xml",
+      SAMPLES_COMMON_PATH + "classification_sample"],
+    "VGG_16": 
+    [ MODEL_CLS_PATH + "frozen_vgg_16.xml",
+      SAMPLES_COMMON_PATH + "classification_sample"],
+    "VGG_19": 
+    [ MODEL_CLS_PATH + "frozen_vgg_19.xml",
+      SAMPLES_COMMON_PATH + "classification_sample"],
+    "I8_INCEPTION_V3": 
+    [ MODEL_CLS_PATH + "frozen_inception_v3_i8.xml", 
+      SAMPLES_COMMON_PATH + "classification_sample"],
+    "I8_INCEPTION_V4": 
+    [ MODEL_CLS_PATH + "frozen_inception_v4_i8.xml",
+      SAMPLES_COMMON_PATH + "classification_sample"],
+    "I8_RESNET_V1_50": 
+    [ MODEL_CLS_PATH + "frozen_resnet_v1_50_i8.xml",
+      SAMPLES_COMMON_PATH + "classification_sample"],
+    "I8_RESNET_V1_101": 
+    [ MODEL_CLS_PATH + "frozen_resnet_v1_101_i8.xml",
+      SAMPLES_COMMON_PATH + "classification_sample"],
+    "I8_RESNET_V1_152": 
+    [ MODEL_CLS_PATH + "frozen_resnet_v1_152_i8.xml",
+      SAMPLES_COMMON_PATH + "classification_sample"],
+    "I8_VGG_16": 
+    [ MODEL_CLS_PATH + "frozen_vgg_16_i8.xml",
+      SAMPLES_COMMON_PATH + "classification_sample"],
+    "I8_VGG_19": 
+    [ MODEL_CLS_PATH + "frozen_vgg_19_i8.xml",
+      SAMPLES_COMMON_PATH + "classification_sample"],
     }
 
-models_tf_custom =  {
-   "inception_v3":"frozen_inception_v3.xml",
-   "resnet_v1_50":"frozen_resnet_v1_50.xml",
-   "inception_resnet_v2":"frozen_inception_resnet_v2.xml",
-   "frcnn_res_50":"frozen_frcnn_resnet50.xml",
-   "ssd_mobilenet":"frozen_ssd_mobnet.xml",
-   "yolo_v2":"frozen_darknet_yolov2_model.xml",
-   "yolo_tiny_v2":"frozen_yolov2-tiny-voc.xml",
-   "yolo_v3":"frozen_darknet_yolov3_model.xml",
-   "yolo_tiny_v3":"frozen_darknet_yolov3_tiny_model.xml",
-   "rfcn":"frozen_rfcn_graph.xml",
-   "i8_inception_v3":"frozen_inception_v3_i8.xml",
-   "i8_resnet_v1_50":"frozen_resnet_v1_50_i8.xml",
-   "i8_inception_resnet_v2":"frozen_inception_resnet_v2_i8.xml",
-    }
-
-models_cf =  {
-    "vgg_16":"VGG_ILSVRC_16_layers.xml",
-    "vgg_19":"VGG_ILSVRC_19_layers.xml",
-    "inception_v3":"inception-v3.xml",
-    "inception_v4":"inception-v4.xml",
-    "resnet_v1_50":"ResNet-50-model.xml",
-    "resnet_v1_101":"ResNet-101-model.xml",
-    "resnet_v1_152":"ResNet-152-model.xml",
-    "ssd_vgg_16": "VGG_VOC0712_SSD_300x300_iter_120000.xml"
-    }
-
-models_cf_custom =  {
-    "inception_v3":"inception-v3.xml",
-    "resnet_v1_50":"ResNet-50-model.xml",
-    "ssd_vgg_16": "VGG_VOC0712_SSD_300x300_iter_120000.xml"
-    }
+CPU_INFO = { "6240" : "Intel(R) Xeon(R) Gold 6240 CPU @ 2.60 GHz 18 Cores ",
+             "6248" : "Intel(R) Xeon(R) Gold 6248 CPU @ 2.50 GHz 20 Cores ",
+             "6254" : "Intel(R) Xeon(R) Gold 6254 CPU @ 3.10 GHz 18 cores ",
+             "8268" : "Intel(R) Xeon(R) Platinum 8268 CPU @ 2.90 GHz 24 cores ",
+             "8280" : "Intel(R) Xeon(R) Platinum 8280 CPU @ 2.70GHz 22 cores ",
+           }
 
 def print_results(args):
   """
@@ -77,39 +122,11 @@ def print_results(args):
 
       parse = file_name.split(".")[0].split("_")
 
-      if args.data_type == "i8":
-        if parse[0] == "i8" :
-          parse = parse[1:]
-        else:
-          continue
-      else:
-        if parse[0] == "i8":
-            continue
-
-      if parse[0] == "resnet" or parse[0] == "frcnn" or parse[1] == "resnet" or parse[1] == "tiny":
-        top = parse[0]+"_"+parse[1]+"_"+parse[2]
-        bs = parse[3]
-        sync_type = parse[4]
-        if sync_type != "sync":
-          stream = parse[5]
-        else:
-          stream = "req0"
-      elif parse[0] == "vgg" or parse[0] == "inception" or parse[0] == "ssd" or parse[0] == "yolo":
-        top = parse[0]+"_"+parse[1]
-        bs = parse[2]
-        sync_type = parse[3]
-        if sync_type != "sync":
-          stream = parse[4]
-        else:
-          stream = "req0"
-      elif parse[0] == "rfcn":
-        top = parse[0]
-        bs = parse[1]
-        sync_type = parse[2]
-        if sync_type != "sync":
-          stream = parse[3]
-        else:
-          stream = "req0"
+      bs = parse[-2]
+      stream = parse[-1]
+      top = parse[0]
+      for name in parse[1:-3]:
+        top = top+'_'+name
 
       if topology.get(top) != None:
         if topology[top].get(bs) != None:
@@ -128,103 +145,228 @@ def print_results(args):
         topology[top][bs][stream] = []
         topology[top][bs][stream].append(val)
 
-  for top in topology:
-    for bs in topology[top]:
-      for stream in topology[top][bs]:
-        num_streams = int(stream[3:])
-        if num_streams != 0:
-         print(top,"\t\t",bs[2:],"\t",num_streams,"\t",topology[top][bs][stream][0])
-        else:
-         print(top,"\t\t",bs[2:],"\t","sync","\t",topology[top][bs][stream][0],"\t",1000/topology[top][bs][stream][0])
+  with open("/tmp/tmp.csv","w") as fp:
+    fp.write("OpenVINO R1.1 INFERENCE PERFORMANCE ON TF OBJECT DETECTION TOPOLOGIES\n")
+    fp.write(CPU_INFO[args.cpu]+"\n")  
+    fp.write("Dataset : IMAGENET\n\n")
+    fp.write("Topology,Batch Size, Streams, Latency, Throughput, Precision\n")
 
+    for top in topology:
+      for bs in topology[top]:
+        for stream in topology[top][bs]:
+          average_latency = sum(topology[top][bs][stream])/float(len(topology[top][bs][stream]))
+          num_streams = stream[3:]
+          fps = int(bs[2:])*1000*float(num_streams)/average_latency
+
+          if "I8" in top:
+            precision = "INT8"
+          else:
+            precision = "FP32"
+
+          fp.write(top + "," + bs[2:] + "," + num_streams + "," + str(average_latency) +  "," + str(fps) + "," + precision + "\n")
+  with open("/tmp/tmp.csv") as fp:
+    lines = fp.readlines()
+    split_lines = [line.split(",") for line in lines[5:]]
+    convert_lines = []
+    for line in split_lines:
+      if "I8" in line[0]:
+        line[0] = line[0][3:]
+      line[1] = int(line[1])
+      line[2] = int(line[2])
+      line[3] = "{0:.2f}".format(float(line[3]))
+      line[4] = "{0:.2f}".format(float(line[4]))
+      convert_lines.append(line)
+
+    sorted_lines = sorted(convert_lines, key=itemgetter(0,5,1,4))
+    bench_name = "bench_" + args.cpu + "_classifcation.csv"
+
+    with open(bench_name,"w") as fp1:
+      fp1.write(lines[0])
+      fp1.write(lines[1])
+      fp1.write(lines[2])
+      fp1.write(lines[3])
+      fp1.write(lines[4])
+      for line in sorted_lines:
+        line[1] = str(line[1]) + "-" + str(line[2])
+        line[2] = str(line[3])
+        line[3] = str(line[4])
+        line[4] = str(line[5])
+        fp1.write(','.join(line[:5]))
 
 def create_shell_script(args):
   """
   """
 
   bs = args.batch_size
-  print("export WKDIR=~/dldt")
-  if args.fw == "caffe":
-    print("export MO_MODELS_PATH=$WKDIR/cf_mo_models")
-    if args.topology == "all":
-      model = models_cf
-    elif args.topology == "custom":
-      model = models_cf_custom
-    else:
-      model = { args.topology : models_cf[args.topology] }
-  else:
-    print("export MO_MODELS_PATH=$WKDIR/tf_mo_models")
-    if args.topology == "all":
-      model = models_tf
-    elif args.topology == "custom":
-      model = models_tf_custom
-    else:
-      model = { args.topology : models_tf[args.topology] }
 
-  LOGS_PATH="$WKDIR/logs"
-  print("export DATA_PATH=$WKDIR/imageNet")
-  print("export SAMPLES_PATH=$WKDIR/samples")
-  print("export DLDT_PATH=/opt/intel/computer_vision_sdk/deployment_tools")
-  print("source  $DLDT_PATH/../bin/setupvars.sh")
-
-
-  if args.cpu == "skl6148" or args.cpu == "clx6248":
-    NUM_CORES = 40
+    # 1,2,4,8,12,16,24,32,48,64,96,128
+  if args.cpu == "8268" or args.cpu == "8168":
+    NUM_CORES = 48
+    SOCK_CORES = 24
     if bs == 1:
-      NUM_STREAMS = [1,2,4,5,8,10,20,40]
+      NUM_STREAMS = [1,2,4,8,12]
+    elif bs == 2:
+      NUM_STREAMS = [1,2,4,8,12]
+    elif bs == 4:
+      NUM_STREAMS = [1,2,4,8]
+    elif bs == 8:
+      NUM_STREAMS = [1,2,4,8]
+    elif bs == 12:
+      NUM_STREAMS = [1,2,4,8]
+    elif bs == 16:
+      NUM_STREAMS = [1,2,4]
+    elif bs == 24:
+      NUM_STREAMS = [1,2,4]
+    elif bs == 32:
+      NUM_STREAMS = [1,2,4]
+    elif bs == 48:
+      NUM_STREAMS = [1,2,4]
+    elif bs == 64:
+      NUM_STREAMS = [1,2,4]
+    elif bs == 96:
+      NUM_STREAMS = [1,2,4]
+    elif bs == 128:
+      NUM_STREAMS = [1,2,4]
+
+  # 1,2,4,7,8,14,16,28,32,56,64,112,128
+  if args.cpu == "8280" or args.cpu == "8180":
+    NUM_CORES = 56
+    SOCK_CORES = 28
+    if bs == 1:
+      NUM_STREAMS = [1,2,4,8,14]
+    elif bs == 2:
+      NUM_STREAMS = [1,2,4,8,14]
+    elif bs == 4:
+      NUM_STREAMS = [1,2,4,8]
+    elif bs == 7:
+      NUM_STREAMS = [1,2,4,8]
+    elif bs == 8:
+      NUM_STREAMS = [1,2,4,8]
+    elif bs == 14:
+      NUM_STREAMS = [1,2,4,8]
+    elif bs == 16:
+      NUM_STREAMS = [1,2,4,8]
+    elif bs == 28:
+      NUM_STREAMS = [1,2,4]
+    elif bs == 32:
+      NUM_STREAMS = [1,2,4]
+    elif bs == 56:
+      NUM_STREAMS = [1,2,4]
+    elif bs == 64:
+      NUM_STREAMS = [1,2,4]
+    elif bs == 112:
+      NUM_STREAMS = [1,2,4]
+    elif bs == 128:
+      NUM_STREAMS = [1,2,4]
+
+  # 1,2,4,6,8,9,16,18,32,36,64,72,128
+  elif args.cpu == "6140" or args.cpu == "6240" or args.cpu == "6154" or args.cpu == "6254":
+    NUM_CORES = 36
+    SOCK_CORES = 18
+    if bs == 1:
+      NUM_STREAMS = [1,2,4,6,9,12,18,36]
+    elif bs == 2:
+      NUM_STREAMS = [1,2,4,6,9,12,18]
+    elif bs == 4:
+      NUM_STREAMS = [1,2,4,6,9,12,18]
+    elif bs == 6:
+      NUM_STREAMS = [1,2,4,6,9,12]
+    elif bs == 8:
+      NUM_STREAMS = [1,2,4,6,9]
+    elif bs == 9:
+      NUM_STREAMS = [1,2,4,6,12]
+    elif bs == 16:
+      NUM_STREAMS = [1,2,4,6,9]
+    elif bs == 18:
+      NUM_STREAMS = [1,2,4,6,9]
+    elif bs == 32:
+      NUM_STREAMS = [1,2,4,6]
+    elif bs == 36:
+      NUM_STREAMS = [1,2,4,6]
+    elif bs == 64:
+      NUM_STREAMS = [1,2,4,6]
+    elif bs == 72:
+      NUM_STREAMS = [1,2,4]
+    elif bs == 128:
+      NUM_STREAMS = [1,2,4]
+
+  # 1,2,4,8,20,40,80
+  elif args.cpu == "6148" or args.cpu == "6248":
+    NUM_CORES = 40
+    SOCK_CORES = 20
+    if bs == 1:
+      NUM_STREAMS = [1,2,4,8,10]
+    elif bs == 2:
+      NUM_STREAMS = [1,2,4,10]
+    elif bs == 4:
+      NUM_STREAMS = [1,2,4,5,10]
     elif bs == 8:
       NUM_STREAMS = [1,2,4,5]
+    elif bs == 16:
+      NUM_STREAMS = [1,2,4,5]
     elif bs == 20:
-      NUM_STREAMS = [1,2,4]
+      NUM_STREAMS = [1,2,4,5]
+    elif bs == 32:
+      NUM_STREAMS = [1,2,4,5]
     elif bs == 40:
       NUM_STREAMS = [1,2,4]
-
-  elif args.cpu == "skl6140" or args.cpu == "clx6240":
-    NUM_CORES = 36
-    if bs == 1:
-      NUM_STREAMS = [1,2,3,4,6,9,18,36]
-    elif bs == 9:
+    elif bs == 64:
       NUM_STREAMS = [1,2,4]
-    elif bs == 18:
+    elif bs == 80:
       NUM_STREAMS = [1,2,4]
-    elif bs == 36:
+    elif bs == 128:
       NUM_STREAMS = [1,2,4]
 
-  for topology in model:
-    if topology == "ssd_mobilenet" or topology == "frcnn_res_50" or topology == "rfcn":
-      sleep_time = "21s"
-    else:
-      sleep_time = "11s"
 
-    executable = "benchmark_app"
+  if args.topology == 'all':
+    top_list = [ key for key in models]
+  else:
+    top_list = args.topology.split(',')
 
+  LOGS_PATH="$WKDIR/logs"
+
+
+  for topology in top_list:
+    sleep_time = str(100)+str(bs*10)+'s'
     for ns in NUM_STREAMS:
-      log_file = os.path.join(LOGS_PATH,topology+"_bs"+str(bs)+"_async_req"+str(ns)+".log &")
-      print('$SAMPLES_PATH/intel64/Release/'+executable+' -i $DATA_PATH/'+ \
-              str(bs)+' -m $MO_MODELS_PATH/'+model[topology]+' -d CPU -api async -nireq '+str(ns)+\
-              ' -niter 100 -l $SAMPLES_PATH/intel64/Release/lib/libcpu_extension.so &>'+log_file)
-      print("echo 'Waiting for "+str(ns)+"-streams to finish'")
-      print("sleep "+sleep_time)
-      print("ps -elf | grep  samples | for i in $(awk '{print $4}');do kill -9 $i; done")
+      cores_per_stream = NUM_CORES//ns
+      log_file = os.path.join(LOGS_PATH,topology+"_bs"+str(bs)+"_async_req"+str(ns)+".log ")
+      print("echo 'Waiting for async "+str(ns)+"-streams to finish'")
+      print('numactl -l $SAMPLES_PATH/intel64/Release/benchmark_app -i $DATA_PATH/'+ \
+              ' -m '+models[topology][0]+' -d CPU -api async -nireq '+ str(ns) + ' -b ' + str(bs) + \
+              ' -niter 100 -l $SAMPLES_PATH/intel64/Release/lib/libcpu_extension.so &>' + log_file)
+      #print("sleep "+sleep_time)
 
-    log_file = os.path.join(LOGS_PATH,topology+"_bs"+str(bs)+"_sync.log &")
-    print('$SAMPLES_PATH/intel64/Release/'+executable+' -i $DATA_PATH/'+ \
-            str(bs)+' -m $MO_MODELS_PATH/'+model[topology]+' -d CPU -api sync -niter 100 -l $SAMPLES_PATH/intel64/Release/lib/libcpu_extension.so &>'+log_file)
-    print("echo 'Waiting for inference to finish'")
-    print("sleep 11s ")
-    print("ps -elf | grep  samples | for i in $(awk '{print $4}');do kill -9 $i; done")
+    log_file = os.path.join(LOGS_PATH,topology+"_bs"+str(bs)+"_sync.log ")
+    print("echo 'Waiting for sync inference to finish'")
+    print('numactl -l $SAMPLES_PATH/intel64/Release/benchmark_app -i $DATA_PATH/'+ ' -b' + \
+            str(bs)+' -m '+ models[topology][0] +' -d CPU -api sync -niter 100 -l $SAMPLES_PATH/intel64/Release/lib/libcpu_extension.so &>'+log_file)
+    #print("sleep 11s ")
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
-  parser.add_argument("--cpu", default="skl6148", help="SKU name")
-  parser.add_argument("--topology", default="resnet_v1_50", help=" topology name")
-  parser.add_argument("--fw", default="caffe", help="caffe/tf")
-  parser.add_argument("--batch_size", type=int, default=1, help="i Batch size")
+  parser.add_argument("--cpu", type=str, default="6254", help="SKU name")
+  parser.add_argument("--topology", default="SSD_MOB_V2", help="topology name")
+  parser.add_argument("--batch_size", type=str, default='1', help="Batch size")
   parser.add_argument("--mode", type=str, default="exe", help="exe/log")
   parser.add_argument("--data_type", type=str, default="f32", help="f32/f16/i8")
   parser.add_argument("--log_dir", type=str, default="./", help="logs directory")
+  parser.add_argument("--display", type=bool, default=False, help="Display supported topologies")
   args = parser.parse_args()
-  if args.mode == "exe":
-    create_shell_script(args)
+  if args.display:
+    for key in models:
+      print(key,end = ",")
   else:
-    print_results(args)
+    if args.mode == "exe":
+      batch_sizes = args.batch_size.split(",")
+      print("export DATA_PATH=$WKDIR/coco_test_data")
+      print("export WKDIR=$HOME/dldt/object_detection")
+      print("export SAMPLES_PATH=$WKDIR/../samples")
+      print("export VINO_PATH=$HOME/intel/openvino/deployment_tools")
+      print("source $VINO_PATH/../bin/setupvars.sh")
+      print("ps -elf | grep  samples | for i in $(awk '{print $4}');do kill -9 $i; done")
+      for size in batch_sizes:
+        args.batch_size = int(size)
+        create_shell_script(args)
+    else:
+      print_results(args)
