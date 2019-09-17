@@ -41,3 +41,7 @@
   ```python
   docker run -it --name <Container name> --network=host  --privileged -v <src path>:<dst path> <image name>
   ```
+* Docker command to save a modified container
+```
+docker commit <container_name> <new_image_name>
+```
