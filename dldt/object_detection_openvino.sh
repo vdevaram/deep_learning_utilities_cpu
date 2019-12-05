@@ -31,6 +31,7 @@ mkdir -p $VINO_WORKSPACE/demos
 rm -rf $VINO_WORKSPACE/demos/*
 cd $VINO_WORKSPACE/demos
 cmake $VINO_HOME/intel/openvino/deployment_tools/inference_engine/demos/
+make -j
 #################### installation and setup complete #######################
 #### initialize environment #####
 export VINO_HOME=$HOME  or export VINO_HOME=/opt
@@ -46,10 +47,23 @@ cd faster_rcnn_resnet50_coco_2018_01_28
 python3 $VINO_HOME/intel/openvino/deployment_tools/model_optimizer/mo.py --framework tf --input_model frozen_inference_graph.pb     --output_dir  ./fp32/ --output=detection_boxes,detection_scores,num_detections --tensorflow_use_custom_operations_config $VINO_HOME/intel/openvino/deployment_tools/model_optimizer/extensions/front/tf/faster_rcnn_support.json --tensorflow_object_detection_api_pipeline_config pipeline.config
 #FP16 Conversion
 python3 $VINO_HOME/intel/openvino/deployment_tools/model_optimizer/mo.py --framework tf --input_model frozen_inference_graph.pb     --output_dir  ./fp16/ --output=detection_boxes,detection_scores,num_detections --tensorflow_use_custom_operations_config $VINO_HOME/intel/openvino/deployment_tools/model_optimizer/extensions/front/tf/faster_rcnn_support.json --tensorflow_object_detection_api_pipeline_config pipeline.config --data_type FP16
-#INT8 conversion
-## TBD
+#INT8 conversion requires trained model along with validation data
+#install required libs
+pip install shapely yamlloader scipy nibabel tqdm xmltodict pillow  sklearn py-cpuinfo --upgrade
+# dataset download
+mkdir -p $VINO_WORKSPACE/coco_data
+cd $VINO_WORKSPACE/coco_data
+wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip
+wget http://images.cocodataset.org/zips/val2017.zip
+unzip val2017.zip
+unzip annotations_trainval2017.zip
+# annotation Conversion
+python $VINO_HOME/intel/openvino/deployment_tools/tools/accuracy_checker_tool/convert_annotation.py mscoco_detection --annotation_file $VINO_WORKSPACE/coco_data/annotations/instances_val2017.json -o ~/coco_data/ -a coco.pickle -m coco.json --has_background True --use_full_label_map  True  --sort_annotations True --images_dir $VINO_WORKSPACE/coco_data/val2017 -ss 2000
+# Download calibration configuration files
+# TBD
+# calibration
+python $VINO_HOME/intel/openvino/deployment_tools/tools/calibration_tool/calibrate.py -c $VINO_WORKSPACE/models/faster_rcnn_resnet50_coco_2018_01_28/faster_rcnn_resnet50_coco.yml  -d $VINO_WORKSPACE/models/faster_rcnn_resnet50_coco_2018_01_28/dataset_definitions.yml -M $VINO_HOME/intel/openvino/deployment_tools/model_optimizer --tf_custom_op_config_dir $VINO_WORKSPACE/models/faster_rcnn_resnet50_coco_2018_01_28/ --models $VINO_WORKSPACE/models/faster_rcnn_resnet50_coco_2018_01_28/ --source $VINO_WORKSPACE/coco_data/ --annotations  $VINO_WORKSPACE/coco_data/ -e $VINO_WORKSPACE/samples/intel64/Release/lib  -cfc
 # Benchmark 
-$VINO_WORKSPACE/samples/intel64/Release/benchmark_app -m $VINO_WORKSPACE/models/faster_rcnn_resnet50_coco_2018_01_28/fp32/frozen_inference_graph.xml
+$VINO_WORKSPACE/samples/intel64/Release/benchmark_app -m $VINO_WORKSPACE/models/faster_rcnn_resnet50_coco_2018_01_28/fp32/frozen_inference_graph.xml -niter 100
 # Python Demo sample usage 
- $VINO_HOME/intel/openvino/deployment_tools/inference_engine/demos/python_demos/object_detection_demo_ssd_async/object_detection_demo_ssd_async.py -i "cam" -m $VINO_WORKSPACE/models/faster_rcnn_resnet50_coco_2018_01_28/fp32/frozen_inference_graph.xml -d CPU  -l $VINO_WORKSPACE/samples/intel64/Release/lib/libcpu_extension.so
-
+$VINO_HOME/intel/openvino/deployment_tools/inference_engine/demos/python_demos/object_detection_demo_ssd_async/object_detection_demo_ssd_async.py -i "cam" -m $VINO_WORKSPACE/models/faster_rcnn_resnet50_coco_2018_01_28/fp32/frozen_inference_graph.xml -d CPU  -l $VINO_WORKSPACE/samples/intel64/Release/lib/libcpu_extension.so
