@@ -42,7 +42,7 @@ source ~/.vino_env/bin/activate
 mkdir -p $VINO_WORKSPACE/models
 cd $VINO_WORKSPACE/models
 
-########### FRCNN for Object detection  ###############
+########### SSD Mobilenet for Object detection  ###############
 wget http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v2_coco_2018_03_29.tar.gz
 tar -zxvf ssd_mobilenet_v2_coco_2018_03_29.tar.gz
 rm ssd_mobilenet_v2_coco_2018_03_29.tar.gz
@@ -82,4 +82,4 @@ $VINO_WORKSPACE/samples/intel64/Release/benchmark_app -m $VINO_WORKSPACE/models/
 $VINO_HOME/intel/openvino/deployment_tools/inference_engine/demos/python_demos/object_detection_demo_ssd_async/object_detection_demo_ssd_async.py -i "cam" -m $VINO_WORKSPACE/models/ssd_mobilenet_v2_coco_2018_03_29/fp32/frozen_inference_graph.xml -d CPU  -l $VINO_WORKSPACE/samples/intel64/Release/lib/libcpu_extension.so
 # INT8 inference
 $VINO_HOME/intel/openvino/deployment_tools/inference_engine/demos/python_demos/object_detection_demo_ssd_async/object_detection_demo_ssd_async.py -i "cam" -m $VINO_WORKSPACE/models/ssd_mobilenet_v2_coco_2018_03_29/int8/frozen_inference_graph_i8.xml -d CPU  -l $VINO_WORKSPACE/samples/intel64/Release/lib/libcpu_extension.so
-########### FRCNN for Object detection  end ###############
+########### SSD Mobilenet for Object detection  end ###############
