@@ -1,5 +1,5 @@
-# This file gives step by step instructions to download install openVINO and use for running object detection models on IA
-#Assumed to have ubuntu or CentOS installed along with Python3.
+# This file gives step by step instructions to download install openVINO and use for running human pose models on IA
+#Assumed to have ubuntu or CentOS installed along with Python3. Skip installation step if openVINO already installed.
 #################### installation and setup #######################
 #download and install openVINO R3.1
 cd /tmp
