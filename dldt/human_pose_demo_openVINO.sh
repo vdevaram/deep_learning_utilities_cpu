@@ -63,7 +63,7 @@ $VINO_WORKSPACE/samples/intel64/Release/benchmark_app -m $VINO_WORKSPACE/models/
 $VINO_WORKSPACE/samples/intel64/Release/benchmark_app -m $VINO_WORKSPACE/models/human_pose/int8/human-pose-estimation-0001.xml -niter 100  -nireq <multiples of cores> -nstreams <multiples of cores> -d CPU
 
 #FP32 inference
-$VINO_WORKSPACE/samples/intel64/Release/human_pose_estimation_demo -m ~/dldt/models/human_pose/fp32/human-pose-estimation-0001.xml -i < image or video or "cam"> 
+$VINO_WORKSPACE/demos/intel64/Release/human_pose_estimation_demo -m ~/dldt/models/human_pose/fp32/human-pose-estimation-0001.xml -i < image or video or "cam"> 
 # INT8 inference
-$VINO_WORKSPACE/samples/intel64/Release/human_pose_estimation_demo -m ~/dldt/models/human_pose/int8/human-pose-estimation-0001.xml -i < image or video or "cam"> 
+$VINO_WORKSPACE/demos/intel64/Release/human_pose_estimation_demo -m ~/dldt/models/human_pose/int8/human-pose-estimation-0001.xml -i < image or video or "cam"> 
 ########### human pose detection  end ###############
