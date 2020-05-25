@@ -12,12 +12,13 @@
 # remove existing if any
 sudo yum remove docker docker-common docker-selinux  docker-engine
 # install pre-requisites
-sudo yum install -y yum-utils   device-mapper-persistent-data   lvm2
+sudo yum install -y yum-utils
 #add repo for docker
 sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-sudo yum-config-manager --enable docker-ce-edge
-sudo yum-config-manager --enable docker-ce-test
-sudo yum install docker-ce
+#sudo yum-config-manager --enable docker-ce-edge
+#sudo yum-config-manager --enable docker-ce-test
+sudo yum install docker-ce docker-ce-cli containerd.io
+sudo systemctl start docker
 sudo systemctl enable docker
 # proxy setup
 mkdir -p /etc/systemd/system/docker.service.d
