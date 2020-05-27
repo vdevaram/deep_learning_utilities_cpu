@@ -9,6 +9,10 @@ mkdir $HOME/efficientNet
 cd $HOME/efficientNet
 source $OPENVINO_INSTALL_DIR/intel/openvino/bin/setupvars.sh
 
+#set CPU settings
+export CORES_PER_SOCKET=24
+
+
 wget https://storage.googleapis.com/cloud-tpu-checkpoints/efficientnet/ckptsaug/efficientnet-b0.tar.gz
 wget https://storage.googleapis.com/cloud-tpu-checkpoints/efficientnet/ckptsaug/efficientnet-b1.tar.gz
 wget https://storage.googleapis.com/cloud-tpu-checkpoints/efficientnet/ckptsaug/efficientnet-b2.tar.gz
@@ -45,29 +49,29 @@ python3 $OPENVINO_INSTALL_DIR/intel/openvino/deployment_tools/model_optimizer/mo
 python3 $OPENVINO_INSTALL_DIR/intel/openvino/deployment_tools/model_optimizer/mo_tf.py --input_model efficientnet-b6/efficientnet_b6.pb  --input "IteratorGetNext:0[1 300 300 3]" --output_dir ./300_xml
 python3 $OPENVINO_INSTALL_DIR/intel/openvino/deployment_tools/model_optimizer/mo_tf.py --input_model efficientnet-b7/efficientnet_b7.pb  --input "IteratorGetNext:0[1 300 300 3]" --output_dir ./300_xml
 
-python3 $OPENVINO_INSTALL_DIR/intel/openvino/deployment_tools/model_optimizer/mo_tf.py --input_model efficientnet-b0/efficientnet_b0.pb  --input "IteratorGetNext:0[1 300 300 3]" --output_dir ./600_xml
-python3 $OPENVINO_INSTALL_DIR/intel/openvino/deployment_tools/model_optimizer/mo_tf.py --input_model efficientnet-b1/efficientnet_b1.pb  --input "IteratorGetNext:0[1 300 300 3]" --output_dir ./600_xml
-python3 $OPENVINO_INSTALL_DIR/intel/openvino/deployment_tools/model_optimizer/mo_tf.py --input_model efficientnet-b2/efficientnet_b2.pb  --input "IteratorGetNext:0[1 300 300 3]" --output_dir ./600_xml
-python3 $OPENVINO_INSTALL_DIR/intel/openvino/deployment_tools/model_optimizer/mo_tf.py --input_model efficientnet-b3/efficientnet_b3.pb  --input "IteratorGetNext:0[1 300 300 3]" --output_dir ./600_xml
-python3 $OPENVINO_INSTALL_DIR/intel/openvino/deployment_tools/model_optimizer/mo_tf.py --input_model efficientnet-b4/efficientnet_b4.pb  --input "IteratorGetNext:0[1 300 300 3]" --output_dir ./600_xml
-python3 $OPENVINO_INSTALL_DIR/intel/openvino/deployment_tools/model_optimizer/mo_tf.py --input_model efficientnet-b5/efficientnet_b5.pb  --input "IteratorGetNext:0[1 300 300 3]" --output_dir ./600_xml
-python3 $OPENVINO_INSTALL_DIR/intel/openvino/deployment_tools/model_optimizer/mo_tf.py --input_model efficientnet-b6/efficientnet_b6.pb  --input "IteratorGetNext:0[1 300 300 3]" --output_dir ./600_xml
-python3 $OPENVINO_INSTALL_DIR/intel/openvino/deployment_tools/model_optimizer/mo_tf.py --input_model efficientnet-b7/efficientnet_b7.pb  --input "IteratorGetNext:0[1 300 300 3]" --output_dir ./600_xml
+python3 $OPENVINO_INSTALL_DIR/intel/openvino/deployment_tools/model_optimizer/mo_tf.py --input_model efficientnet-b0/efficientnet_b0.pb  --input "IteratorGetNext:0[1 600 600 3]" --output_dir ./600_xml
+python3 $OPENVINO_INSTALL_DIR/intel/openvino/deployment_tools/model_optimizer/mo_tf.py --input_model efficientnet-b1/efficientnet_b1.pb  --input "IteratorGetNext:0[1 600 600 3]" --output_dir ./600_xml
+python3 $OPENVINO_INSTALL_DIR/intel/openvino/deployment_tools/model_optimizer/mo_tf.py --input_model efficientnet-b2/efficientnet_b2.pb  --input "IteratorGetNext:0[1 600 600 3]" --output_dir ./600_xml
+python3 $OPENVINO_INSTALL_DIR/intel/openvino/deployment_tools/model_optimizer/mo_tf.py --input_model efficientnet-b3/efficientnet_b3.pb  --input "IteratorGetNext:0[1 600 600 3]" --output_dir ./600_xml
+python3 $OPENVINO_INSTALL_DIR/intel/openvino/deployment_tools/model_optimizer/mo_tf.py --input_model efficientnet-b4/efficientnet_b4.pb  --input "IteratorGetNext:0[1 600 600 3]" --output_dir ./600_xml
+python3 $OPENVINO_INSTALL_DIR/intel/openvino/deployment_tools/model_optimizer/mo_tf.py --input_model efficientnet-b5/efficientnet_b5.pb  --input "IteratorGetNext:0[1 600 600 3]" --output_dir ./600_xml
+python3 $OPENVINO_INSTALL_DIR/intel/openvino/deployment_tools/model_optimizer/mo_tf.py --input_model efficientnet-b6/efficientnet_b6.pb  --input "IteratorGetNext:0[1 600 600 3]" --output_dir ./600_xml
+python3 $OPENVINO_INSTALL_DIR/intel/openvino/deployment_tools/model_optimizer/mo_tf.py --input_model efficientnet-b7/efficientnet_b7.pb  --input "IteratorGetNext:0[1 600 600 3]" --output_dir ./600_xml
 
-numactl -m 0 -N 0 -C 0-23  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./300_xml/efficientnet_b0.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b0.log
-numactl -m 0 -N 0 -C 0-23  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./300_xml/efficientnet_b1.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b1.log
-numactl -m 0 -N 0 -C 0-23  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./300_xml/efficientnet_b2.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b2.log
-numactl -m 0 -N 0 -C 0-23  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./300_xml/efficientnet_b3.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b3.log
-numactl -m 0 -N 0 -C 0-23  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./300_xml/efficientnet_b4.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b4.log
-numactl -m 0 -N 0 -C 0-23  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./300_xml/efficientnet_b5.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b5.log
-numactl -m 0 -N 0 -C 0-23  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./300_xml/efficientnet_b6.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b6.log
-numactl -m 0 -N 0 -C 0-23  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./300_xml/efficientnet_b7.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b7.log
+numactl -m 0 -N 0 -C 0-$CORES_PER_SOCKET-1  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./300_xml/efficientnet_b0.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b0.log
+numactl -m 0 -N 0 -C 0-$CORES_PER_SOCKET-1  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./300_xml/efficientnet_b1.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b1.log
+numactl -m 0 -N 0 -C 0-$CORES_PER_SOCKET-1  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./300_xml/efficientnet_b2.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b2.log
+numactl -m 0 -N 0 -C 0-$CORES_PER_SOCKET-1  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./300_xml/efficientnet_b3.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b3.log
+numactl -m 0 -N 0 -C 0-$CORES_PER_SOCKET-1  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./300_xml/efficientnet_b4.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b4.log
+numactl -m 0 -N 0 -C 0-$CORES_PER_SOCKET-1  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./300_xml/efficientnet_b5.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b5.log
+numactl -m 0 -N 0 -C 0-$CORES_PER_SOCKET-1  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./300_xml/efficientnet_b6.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b6.log
+numactl -m 0 -N 0 -C 0-$CORES_PER_SOCKET-1  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./300_xml/efficientnet_b7.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b7.log
 
-numactl -m 0 -N 0 -C 0-23  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./600_xml/efficientnet_b0.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b0.log
-numactl -m 0 -N 0 -C 0-23  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./600_xml/efficientnet_b1.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b1.log
-numactl -m 0 -N 0 -C 0-23  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./600_xml/efficientnet_b2.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b2.log
-numactl -m 0 -N 0 -C 0-23  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./600_xml/efficientnet_b3.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b3.log
-numactl -m 0 -N 0 -C 0-23  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./600_xml/efficientnet_b4.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b4.log
-numactl -m 0 -N 0 -C 0-23  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./600_xml/efficientnet_b5.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b5.log
-numactl -m 0 -N 0 -C 0-23  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./600_xml/efficientnet_b6.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b6.log
-numactl -m 0 -N 0 -C 0-23  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./600_xml/efficientnet_b7.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b7.log
+numactl -m 0 -N 0 -C 0-$CORES_PER_SOCKET-1  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./600_xml/efficientnet_b0.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b0.log
+numactl -m 0 -N 0 -C 0-$CORES_PER_SOCKET-1  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./600_xml/efficientnet_b1.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b1.log
+numactl -m 0 -N 0 -C 0-$CORES_PER_SOCKET-1  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./600_xml/efficientnet_b2.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b2.log
+numactl -m 0 -N 0 -C 0-$CORES_PER_SOCKET-1  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./600_xml/efficientnet_b3.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b3.log
+numactl -m 0 -N 0 -C 0-$CORES_PER_SOCKET-1  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./600_xml/efficientnet_b4.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b4.log
+numactl -m 0 -N 0 -C 0-$CORES_PER_SOCKET-1  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./600_xml/efficientnet_b5.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b5.log
+numactl -m 0 -N 0 -C 0-$CORES_PER_SOCKET-1  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./600_xml/efficientnet_b6.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b6.log
+numactl -m 0 -N 0 -C 0-$CORES_PER_SOCKET-1  $SAMPLES_DIR/intel64/Release/benchmark_app -m ./600_xml/efficientnet_b7.xml --nstreams 1 --niter 100 &>./logs/efficientnet_b7.log
